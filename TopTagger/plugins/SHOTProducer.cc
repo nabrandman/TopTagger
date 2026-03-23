@@ -330,7 +330,7 @@ void SHOTProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         double electronMultiplicity = jet.electronMultiplicity();
         double muonMultiplicity = jet.muonMultiplicity();
 
-        constituents.emplace_back(perJetLVec, btag, 0.0);
+        constituents.emplace_back(perJetLVec, btag);
         constituents.back().setIndex(iJet);
         constituents.back().setExtraVar("qgMult"                              , qgMult);
         constituents.back().setExtraVar("qgPtD"                               , qgPtD);
