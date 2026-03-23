@@ -27,8 +27,7 @@ private:
     unsigned int index_;
 
     //AK4 specific variables 
-    double bTagDisc_, qgLikelihood_;
-    double qgMult_, qgPtD_, qgAxis1_, qgAxis2_;
+    double bTagDisc_;
 
     //AK8 specific variables 
     double tau1_, tau2_, tau3_, softDropMass_, topDisc_, WDisc_;
@@ -45,24 +44,22 @@ private:
 public:
     /** Empty constructor */
     Constituent();
-    /** Construct an AK4 jet from TLorentzVector, b-tag discriminator, and quark-gluonlikelihood */
-    Constituent(const TLorentzVector& p, const double& bTagDisc, const double& qgLikelihood);
+    /** Construct an AK4 jet from TLorentzVector, b-tag discriminator */
+    Constituent(const TLorentzVector& p, const double& bTagDisc);
     /** Construct generic constituent jet from TLorentzVector and type */
     Constituent(const TLorentzVector& p, const Constituent::ConstituentType& type);
     /** Construct an AK8 jet from TLorentzVector, Nsubjettiness inputs tau1/2/3, softdrop mass, softdrop subjets vector and wMassCorrection (if applicable). */
     Constituent(const TLorentzVector& p, const double& tau1, const double& tau2, const double& tau3, const double& softDropMass, const std::vector<Constituent>& subjets, const double& wMassCorr);
     
-    void setPBtag(const TLorentzVector& p, const double& bTagDisc, const double& qgLikelihood);
+    void setPBtag(const TLorentzVector& p, const double& bTagDisc);
     void setP(const TLorentzVector& p);
     void setBTag(const double&  bTagDisc);
-    void setQGLikelihood(const double& qgLikelihood);
     void setType(const Constituent::ConstituentType type);
     void setTau1(const double& tau1);
     void setTau2(const double& tau2);
     void setTau3(const double& tau3);
     void setSoftDropMass(const double& softDropMass);
     void setSubJets(const std::vector<Constituent>& subjets);
-    void setQGLVars(const double qgMult, const double qgPtD, const double qgAxis1, const double qgAxis2);
     void setWMassCorr(const double& wMassCorr);
     void setTopDisc(const double& topDisc);
     void setWDisc(const double& WDisc);
@@ -91,7 +88,6 @@ public:
     //* Alias for p() */
     const TLorentzVector& getP() const                    { return p(); }
     double getBTagDisc() const                      { return bTagDisc_; }
-    double getQGLikelihood() const                  { return qgLikelihood_; }
     ConstituentType getType() const                 { return type_; }
     double getTau1() const                          { return tau1_; }
     double getTau2() const                          { return tau2_; }
@@ -100,10 +96,6 @@ public:
     const decltype(subjets_)& getSubjets() const          { return subjets_; }
     const decltype(genMatches_)& getGenMatches() const    { return genMatches_; }
     double getWMassCorr() const                     { return wMassCorr_; }
-    double getQGMult() const                        { return qgMult_; }
-    double getQGPtD() const                         { return qgPtD_; }
-    double getQGAxis1() const                       { return qgAxis1_; }
-    double getQGAxis2() const                       { return qgAxis2_; }
     double getTopDisc() const                       { return topDisc_; }
     double getWDisc() const                         { return WDisc_; }
     int getIndex() const                         { return index_; }

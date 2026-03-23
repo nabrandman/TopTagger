@@ -49,35 +49,23 @@ namespace ttUtility
     /**
      *Class to gather the information necessary to construct the AK4 jet constituents
      */
-    template<typename FLOATTYPE, typename FLOATCONTAINERTYPE = std::vector<FLOATTYPE>, typename LORENTZVECTORCONTAINER = std::vector<TLorentzVector>, typename INTCONTAINERTYPE = std::vector<int>>
+    template<typename FLOATTYPE, typename FLOATCONTAINERTYPE = std::vector<FLOATTYPE>, typename LORENTZVECTORCONTAINER = std::vector<TLorentzVector>, typename INTCONTAINERTYPE = std::vector<int> >
     class ConstAK4Inputs : public ConstGenInputs
     {
     private:
         const LORENTZVECTORCONTAINER* jetsLVec_;
         const FLOATCONTAINERTYPE* btagFactors_;
-        const FLOATCONTAINERTYPE* qgLikelihood_;
-        const INTCONTAINERTYPE* qgMult_;
-        const FLOATCONTAINERTYPE* qgPtD_;
-        const FLOATCONTAINERTYPE* qgAxis1_;
-        const FLOATCONTAINERTYPE* qgAxis2_;
         const std::vector<unsigned char>* filter_;
         
         std::map<std::string, const FLOATCONTAINERTYPE*> extraInputVariables_;
         
     public:
         /**
-         *Basic constructor with QGL
-         *@param jetsLVec Jet TLorentzVectors for each jet
-         *@param btagFactors B-tag discriminators for each jet
-         *@param qgLikelihood Quark-gluon likelihoods for each jet
-         */
-        ConstAK4Inputs(const LORENTZVECTORCONTAINER& jetsLVec, const FLOATCONTAINERTYPE& btagFactors, const FLOATCONTAINERTYPE& qgLikelihood) : ConstGenInputs(), jetsLVec_(&jetsLVec), btagFactors_(&btagFactors), qgLikelihood_(&qgLikelihood), qgMult_(nullptr), qgPtD_(nullptr), qgAxis1_(nullptr), qgAxis2_(nullptr), filter_(nullptr) {}
-        /**
          *Basic constructor
          *@param jetsLVec Jet TLorentzVectors for each jet
          *@param btagFactors B-tag discriminators for each jet
          */
-        ConstAK4Inputs(const LORENTZVECTORCONTAINER& jetsLVec, const FLOATCONTAINERTYPE& btagFactors) : ConstGenInputs(), jetsLVec_(&jetsLVec), btagFactors_(&btagFactors), qgLikelihood_(nullptr), qgMult_(nullptr), qgPtD_(nullptr), qgAxis1_(nullptr), qgAxis2_(nullptr), filter_(nullptr) {}
+        ConstAK4Inputs(const LORENTZVECTORCONTAINER& jetsLVec, const FLOATCONTAINERTYPE& btagFactors) : ConstGenInputs(), jetsLVec_(&jetsLVec), btagFactors_(&btagFactors), filter_(nullptr) {}
         /**
          *Constructor with gen informaion 
          *@param jetsLVec Jet TLorentzVectors for each jet
@@ -86,18 +74,7 @@ namespace ttUtility
          *@param hadGenTops Vector of hadronicly decaying gen top TLorentzVectors
          *@param hadGenTopDaughters Vector of direct decay daughters of the top quarks
          */
-        ConstAK4Inputs(const LORENTZVECTORCONTAINER& jetsLVec, const FLOATCONTAINERTYPE& btagFactors, const FLOATCONTAINERTYPE& qgLikelihood, const LORENTZVECTORCONTAINER& hadGenTops, const std::vector<std::vector<const TLorentzVector*>>& hadGenTopDaughters) : ConstGenInputs(hadGenTops, hadGenTopDaughters), jetsLVec_(&jetsLVec), btagFactors_(&btagFactors), qgLikelihood_(&qgLikelihood), qgMult_(nullptr), qgPtD_(nullptr), qgAxis1_(nullptr), qgAxis2_(nullptr), filter_(nullptr) {}
-        /**
-         *Adds jet shape inputs from the quark-gluon likelihood calculator
-         */
-        void addQGLVectors(const INTCONTAINERTYPE& qgMult, const FLOATCONTAINERTYPE& qgPtD, const FLOATCONTAINERTYPE& qgAxis1, const FLOATCONTAINERTYPE& qgAxis2)
-        {
-            qgMult_ = &qgMult;
-            qgPtD_ = &qgPtD;
-            qgAxis1_ = &qgAxis1;
-            qgAxis2_ = &qgAxis2;
-        }
-
+        ConstAK4Inputs(const LORENTZVECTORCONTAINER& jetsLVec, const FLOATCONTAINERTYPE& btagFactors, const LORENTZVECTORCONTAINER& hadGenTops, const std::vector<std::vector<const TLorentzVector*>>& hadGenTopDaughters) : ConstGenInputs(hadGenTops, hadGenTopDaughters), jetsLVec_(&jetsLVec), btagFactors_(&btagFactors), filter_(nullptr) {}
         /**
          *Set a filter vector.  This will allow ceratin jets to be ignored when constructing the constituents vector.  The vector should contain "true" for jets to keep and "false" for jets which will not be put in the constituents vector.  
          */
@@ -128,7 +105,7 @@ namespace ttUtility
 
             //Safety check that jet and b-tag vectors are the same length
             //Special exception for qgLikelihood if it is empty (for slimplified tagger)
-            if(jetsLVec_->size() != btagFactors_->size() || (qgLikelihood_ != nullptr && jetsLVec_->size() != qgLikelihood_->size()))
+            if(jetsLVec_->size() != btagFactors_->size())
             {
                 THROW_TTEXCEPTION("Unequal vector size!!!!!!!\n" + std::to_string(jetsLVec_->size()) + "\t" + std::to_string(btagFactors_->size()));
             }
@@ -138,14 +115,6 @@ namespace ttUtility
                 THROW_TTEXCEPTION("Unequal vector size between filter and jet vectors!!!!!!!\n" + std::to_string(jetsLVec_->size()) + "\t" + std::to_string(filter_->size()));
             }
 
-            if(qgMult_ && qgPtD_ && qgAxis1_ && qgAxis2_) 
-            {
-                if(jetsLVec_->size() != qgMult_->size() || jetsLVec_->size() != qgPtD_->size() || jetsLVec_->size() != qgAxis1_->size() || jetsLVec_->size() != qgAxis2_->size())
-                {
-                    THROW_TTEXCEPTION("Unequal vector size (QGL)!!!!!!!\n");
-                }
-            }
-
             //Construct constituents in place in the vector
             for(unsigned int iJet = 0; iJet < jetsLVec_->size(); ++iJet)
             {
@@ -153,13 +122,7 @@ namespace ttUtility
                 if(filter_ && !(*filter_)[iJet]) continue;
                 
                 //create constituent 
-                constituents.emplace_back((*jetsLVec_)[iJet], static_cast<double>((*btagFactors_)[iJet]), static_cast<double>((qgLikelihood_ != nullptr)?((*qgLikelihood_)[iJet]):(0.0)));
-
-                //Add additional QGL info if it is provided 
-                if(qgMult_ && qgPtD_ && qgAxis1_ && qgAxis2_) 
-                {
-                    constituents.back().setQGLVars(static_cast<double>((*qgMult_)[iJet]), static_cast<double>((*qgPtD_)[iJet]), static_cast<double>((*qgAxis1_)[iJet]), static_cast<double>((*qgAxis2_)[iJet]));
-                }
+                constituents.emplace_back((*jetsLVec_)[iJet], static_cast<double>((*btagFactors_)[iJet]));
 
                 //Add any extra variables that have been added 
                 for(const auto& extraVar : extraInputVariables_)
@@ -530,7 +493,7 @@ namespace ttUtility
     std::vector<Constituent> packageConstituentsAK4(ConstAK4Inputs<float>& inputs);
 
     ///backwards compatability overload
-    std::vector<Constituent> packageConstituents(const std::vector<TLorentzVector>& jetsLVec, const std::vector<double>& btagFactors, const std::vector<double>& qgLikelihood);
+    std::vector<Constituent> packageConstituents(const std::vector<TLorentzVector>& jetsLVec, const std::vector<double>& btagFactors);
     
     ///Tool to calcualte MT2 from tagger results
     double calculateMT2(const TopTaggerResults& ttr, const TLorentzVector& metLVec);
@@ -621,11 +584,6 @@ namespace ttUtility
 
         int j_m_lab_[NCONST];
         int j_CSV_lab_[NCONST];
-        int j_QGL_lab_[NCONST];
-        int j_qgMult_lab_[NCONST];
-        int j_qgPtD_lab_[NCONST];
-        int j_qgAxis1_lab_[NCONST];
-        int j_qgAxis2_lab_[NCONST];
         int j_CvsL_lab_[NCONST];
         int dR12_lab_[NCONST];
         int dR12_3_lab_[NCONST];
@@ -644,12 +602,7 @@ namespace ttUtility
         int j_pt_lab_[NCONST];
         int j_m_[NCONST];
         int j_CSV_[NCONST];
-        int j_QGL_[NCONST];
         int j_recoJetsJecScaleRawToFull_[NCONST];
-        int j_qgLikelihood_[NCONST];
-        int j_qgPtD_[NCONST];
-        int j_qgAxis1_[NCONST];
-        int j_qgAxis2_[NCONST];
         int j_recoJetschargedHadronEnergyFraction_[NCONST];
         int j_recoJetschargedEmEnergyFraction_[NCONST];
         int j_recoJetsneutralEmEnergyFraction_[NCONST];
@@ -657,32 +610,25 @@ namespace ttUtility
         int j_recoJetsHFHadronEnergyFraction_[NCONST];
         int j_recoJetsHFEMEnergyFraction_[NCONST];
         int j_recoJetsneutralEnergyFraction_[NCONST];
-        int j_PhotonEnergyFraction_[NCONST];
-        int j_ElectronEnergyFraction_[NCONST];
-        int j_ChargedHadronMultiplicity_[NCONST];
-        int j_NeutralHadronMultiplicity_[NCONST];
-        int j_PhotonMultiplicity_[NCONST];
+        int j_ChargedMultiplicity_[NCONST];
+        int j_NeutralMultiplicity_[NCONST];
         int j_ElectronMultiplicity_[NCONST];
         int j_MuonMultiplicity_[NCONST];
-        int j_DeepCSVb_[NCONST];
-        int j_DeepCSVc_[NCONST];
-        int j_DeepCSVl_[NCONST];
-        int j_DeepCSVbb_[NCONST];
-        int j_DeepCSVcc_[NCONST];
-        int j_DeepFlavorb_[NCONST];
-        int j_DeepFlavorbb_[NCONST];
-        int j_DeepFlavorlepb_[NCONST];
-        int j_DeepFlavorc_[NCONST];
-        int j_DeepFlavoruds_[NCONST];
-        int j_DeepFlavorg_[NCONST];
-        int j_CvsL_[NCONST];
-        int j_CvsB_[NCONST];
+	int j_TotalMultiplicity_[NCONST];
+	int j_btagUParTAK4CvB_[NCONST];
+	int j_btagUParTAK4CvL_[NCONST];
+	int j_btagUParTAK4CvNotB_[NCONST];
+	int j_btagUParTAK4QvG_[NCONST];
+	int j_btagUParTAK4SvCB_[NCONST];
+	int j_btagUParTAK4SvUDG_[NCONST];
+	int j_btagUParTAK4UDG_[NCONST];
+        int j_btagUParTAK4probb_[NCONST];
+	int j_btagUParTAK4probbb_[NCONST];
         int j_CombinedSvtx_[NCONST];
         int j_JetProba_[NCONST];
         int j_JetBprob_[NCONST];
         int j_recoJetsBtag_[NCONST];
         int j_recoJetsCharge_[NCONST];
-        int j_qgMult_[NCONST];
         int dTheta_[NCONST];
         int j12_m_[NCONST];
         int j_partonFlavor_[NCONST];
@@ -718,8 +664,8 @@ namespace ttUtility
         }
     }
 
-    template<typename TLVCONTAINERTYPE = std::vector<TLorentzVector>, typename INTCONTAINERTYPE = std::vector<int> >
-    std::pair<std::vector<TLorentzVector>, std::vector<std::vector<const TLorentzVector*>>> GetTopdauGenLVecFromNano(const TLVCONTAINERTYPE& genDecayLVec, const INTCONTAINERTYPE& genDecayPdgIdVec, const INTCONTAINERTYPE& genDecayStatFlag, const INTCONTAINERTYPE& genDecayMomIdxVec, const int targedId = 6, const unsigned int targetDaughters = 3)
+    template<typename TLVCONTAINERTYPE = std::vector<TLorentzVector>, typename INTCONTAINERTYPE = std::vector<int>, typename SHORTCONTAINERTYPE = std::vector<short> >
+    std::pair<std::vector<TLorentzVector>, std::vector<std::vector<const TLorentzVector*>>> GetTopdauGenLVecFromNano(const TLVCONTAINERTYPE& genDecayLVec, const INTCONTAINERTYPE& genDecayPdgIdVec, const SHORTCONTAINERTYPE& genDecayStatFlag, const SHORTCONTAINERTYPE& genDecayMomIdxVec, const int targedId = 6, const unsigned int targetDaughters = 3)
     {
         std::pair<std::vector<TLorentzVector>, std::vector<std::vector<const TLorentzVector*>>> returnVal;
         for(unsigned iTop=0; iTop < genDecayLVec.size(); ++iTop)
@@ -759,10 +705,10 @@ namespace ttUtility
 
     //Gen matching helper functions 
     ///Helper function to help find the hadronically decaying gen tops 
-    std::vector<TLorentzVector> GetHadTopLVec(const std::vector<TLorentzVector>& genDecayLVec, const std::vector<int>& genDecayPdgIdVec, const std::vector<int>& genDecayIdxVec, const std::vector<int>& genDecayMomIdxVec);
+    std::vector<TLorentzVector> GetHadTopLVec(const std::vector<TLorentzVector>& genDecayLVec, const std::vector<int>& genDecayPdgIdVec, const std::vector<short>& genDecayIdxVec, const std::vector<short>& genDecayMomIdxVec);
 
     ///Helper function to get the direct decay products of the gen tops
-    std::vector<const TLorentzVector*> GetTopdauLVec(const TLorentzVector& top, const std::vector<TLorentzVector>& genDecayLVec, const std::vector<int>& genDecayPdgIdVec, const std::vector<int>& genDecayIdxVec, const std::vector<int>& genDecayMomIdxVec);
+    std::vector<const TLorentzVector*> GetTopdauLVec(const TLorentzVector& top, const std::vector<TLorentzVector>& genDecayLVec, const std::vector<int>& genDecayPdgIdVec, const std::vector<short>& genDecayIdxVec, const std::vector<short>& genDecayMomIdxVec);
 
     //Helper function to expand env. variables in file path
     //Originally from https://stackoverflow.com/questions/1902681/expand-file-names-that-have-environment-variables-in-their-path/20715800#20715800

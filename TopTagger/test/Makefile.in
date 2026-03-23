@@ -56,7 +56,8 @@ ifdef PYTHONCFG
 
 	CXXFLAGS += -DDOPYCAPIBIND
 	LIBS     += -L$(shell $(PYTHONCFG) --prefix)/lib $(shell $(PYTHONCFG) --libs)
-	PYROOTLIBS += -lPyROOT
+#	PYROOTLIBS += -lPyROOT
+	PYROOTLIBS += -lROOTTPython
 endif
 
 #scram specific numpy c-api

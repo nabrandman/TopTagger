@@ -51,7 +51,7 @@ static ttPython::Py_buffer_wrapper<TLorentzVector> createLorentzP4(PyObject* lor
 
         return ttPython::Py_buffer_wrapper<TLorentzVector>(std::move(vec));
     }
-    else if(TPython::ObjectProxy_Check(lorentzVector)) //this is already vector<TLorentzVector>
+    else if(TPython::CPPInstance_Check(lorentzVector)) //this is already vector<TLorentzVector>
     {
         return ttPython::Py_buffer_wrapper<TLorentzVector>(lorentzVector);
     }
@@ -83,8 +83,8 @@ static int TopTaggerInterface_makeGenInfo(
     auto& genPartLV = tempTLVBuffers.back();
 
     ttPython::Py_buffer_wrapper<Int_t> pdgId(pPdgId, nGenPart);
-    ttPython::Py_buffer_wrapper<Int_t> statusFlag(pStatusFlag, nGenPart);
-    ttPython::Py_buffer_wrapper<Int_t> genPartIdxMother(pGenPartIdxMother, nGenPart);
+    ttPython::Py_buffer_wrapper<Short_t> statusFlag(pStatusFlag, nGenPart);
+    ttPython::Py_buffer_wrapper<Short_t> genPartIdxMother(pGenPartIdxMother, nGenPart);
 
     //Create gen information 
     auto* genInfoPtr = new std::pair<std::vector<TLorentzVector>, std::vector<std::vector<const TLorentzVector*>>>(ttUtility::GetTopdauGenLVecFromNano(genPartLV, pdgId, statusFlag, genPartIdxMother));
@@ -896,7 +896,7 @@ extern "C"
 
         Py_INCREF(p);
 
-        if(TPython::ObjectProxy_Check(p))
+        if(TPython::CPPInstance_Check(p))
         std::cout << Py_TYPE(p)->tp_name << std::endl;
 
         Py_DECREF(p);

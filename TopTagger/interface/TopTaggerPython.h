@@ -113,13 +113,13 @@ namespace ttPython
             {
                 translatePyList(pObj_);
             }
-            else if(TPython::ObjectProxy_Check(pObj_))  //Check if this is a root generated object 
+            else if(TPython::CPPInstance_Check(pObj_))  //Check if this is a root generated object 
             {
                 //Sloppy type checking ... but its better than no type checking
                 if(strstr(Py_TYPE(pObj_)->tp_name, "TTreeReaderArray"))
                 {
                     //(unsafe) cast pointer as TTreeReader, can we do more type checking?
-                    TTreeReaderArray<T> * tra = static_cast<TTreeReaderArray<T>*>(TPython::ObjectProxy_AsVoidPtr(pObj_));
+                    TTreeReaderArray<T> * tra = static_cast<TTreeReaderArray<T>*>(TPython::CPPInstance_AsVoidPtr(pObj_));
 
                     len_ = tra->GetSize();
                     buf_ = static_cast<T*>(tra->GetAddress());
@@ -127,7 +127,7 @@ namespace ttPython
                 else if(strstr(Py_TYPE(pObj_)->tp_name, "vector"))
                 {
                     //(unsafe) cast pointer as TTreeReader, can we do more type checking?
-                    std::vector<T>* vec = static_cast<std::vector<T> *>(TPython::ObjectProxy_AsVoidPtr(pObj_));
+                    std::vector<T>* vec = static_cast<std::vector<T> *>(TPython::CPPInstance_AsVoidPtr(pObj_));
             
                     setVecBuffer(*vec);
                 }

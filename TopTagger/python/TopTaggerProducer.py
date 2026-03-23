@@ -96,9 +96,6 @@ class TopTaggerProducer(Module):
 
             if self.recalculateFromRawInputs:
                 supplementaryFloatVariables = {
-                    "qgPtD":                                event.Jet_qgptD,
-                    "qgAxis1":                              event.Jet_qgAxis1,
-                    "qgAxis2":                              event.Jet_qgAxis2,
                     "recoJetschargedHadronEnergyFraction":  event.Jet_chHEF,
                     "recoJetschargedEmEnergyFraction":      event.Jet_chEmEF,
                     "recoJetsneutralEmEnergyFraction":      event.Jet_neEmEF,
@@ -119,9 +116,7 @@ class TopTaggerProducer(Module):
                     "DeepCSVbb":                            event.Jet_deepCSVbb,
                 }
                 
-                supplementaryIntVariables = {
-                    "qgMult":                               event.Jet_qgMult,
-                }
+                supplementaryIntVariables = {}
             else:
                 supplementaryFloatVariables = {}
                 supplementaryIntVariables = {}

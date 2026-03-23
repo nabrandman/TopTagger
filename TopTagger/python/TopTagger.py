@@ -143,9 +143,6 @@ class TopTagger:
         for i in xrange(nHackLoop):
 
             supplementaryFloatVariables = {
-                "qgPtD":                                event.Jet_qgptD,
-                "qgAxis1":                              event.Jet_qgAxis1,
-                "qgAxis2":                              event.Jet_qgAxis2,
                 "recoJetschargedHadronEnergyFraction":  event.Jet_chHEF,
                 "recoJetschargedEmEnergyFraction":      event.Jet_chEmEF,
                 "recoJetsneutralEmEnergyFraction":      event.Jet_neEmEF,
@@ -166,14 +163,12 @@ class TopTagger:
                 "DeepCSVbb":                            event.Jet_deepCSVbb,
             }
             
-            supplementaryIntVariables = {
-                "qgMult":                               event.Jet_qgMult,
-            }
+            supplementaryIntVariables = {}
 
             nJets = event.nJet
             nElec = event.nElectron
             nMuon = event.nMuon
-            ak4Inputs = (nJets, (event.Jet_pt, event.Jet_eta, event.Jet_phi, event.Jet_mass, nJets), event.Jet_btagDeepB, supplementaryFloatVariables, supplementaryIntVariables, event.Jet_electronIdx1, event.Jet_muonIdx1, nElec, (event.Electron_pt, event.Electron_eta, event.Electron_phi, event.Electron_mass, nElec), event.Electron_vidNestedWPBitmap, event.Electron_miniPFRelIso_all, nMuon, (event.Muon_pt, event.Muon_eta, event.Muon_phi, event.Muon_mass, nMuon), None, event.Muon_miniPFRelIso_all)
+            ak4Inputs = (nJets, (event.Jet_pt, event.Jet_eta, event.Jet_phi, event.Jet_mass, nJets), event.Jet_btagUParTAK4B, supplementaryFloatVariables, supplementaryIntVariables, event.Jet_electronIdx1, event.Jet_muonIdx1, nElec, (event.Electron_pt, event.Electron_eta, event.Electron_phi, event.Electron_mass, nElec), event.Electron_vidNestedWPBitmap, event.Electron_miniPFRelIso_all, nMuon, (event.Muon_pt, event.Muon_eta, event.Muon_phi, event.Muon_mass, nMuon), None, event.Muon_miniPFRelIso_all)
             
             nFatJet = event.nFatJet
             nSubJet = event.nSubJet
@@ -203,10 +198,6 @@ if __name__ == "__main__":
 
     def getTopsFromExampleFile(tt, event):
         supplementaryFloatVariables = {
-            "qgPtD":                                event.ak4qgPtD,
-            "qgAxis1":                              event.ak4qgAxis1,
-            "qgAxis2":                              event.ak4qgAxis2,
-            "qgMult":                               event.ak4qgMult,
             "recoJetschargedHadronEnergyFraction":  event.ak4recoJetschargedHadronEnergyFraction,
             "recoJetschargedEmEnergyFraction":      event.ak4recoJetschargedEmEnergyFraction,
             "recoJetsneutralEmEnergyFraction":      event.ak4recoJetsneutralEmEnergyFraction,

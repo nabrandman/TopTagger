@@ -170,24 +170,6 @@ process.slimmedMuonsWithUserData = cms.EDProducer("PATMuonUserDataEmbedder",
 
 ###############################################################################################################################
 
-process.load('RecoJets.JetProducers.QGTagger_cfi')
-process.QGTagger.srcJets   = cms.InputTag("slimmedJets")
-process.QGTagger.jetsLabel = cms.string('QGL_AK4PFchs')
-
-process.slimmedJetsWithUserData = cms.EDProducer("PATJetUserDataEmbedder",
-    src = cms.InputTag("slimmedJets"),
-    userFloats = cms.PSet(
-        qgptD   = cms.InputTag("QGTagger:ptD"),
-        qgAxis1 = cms.InputTag("QGTagger:axis1"),
-        qgAxis2 = cms.InputTag("QGTagger:axis2"),
-        ),
-    userInts = cms.PSet(
-        qgMult = cms.InputTag("QGTagger:mult")
-        ),
-)
-
-###############################################################################################################################
-
 process.load("TopTagger.TopTagger.SHOTProducer_cfi")
 process.SHOTProducer.ak4JetSrc = cms.InputTag("slimmedJetsWithUserData")
 process.SHOTProducer.muonSrc = cms.InputTag('slimmedMuonsWithUserData')
@@ -203,6 +185,5 @@ process.out = cms.OutputModule("PoolOutputModule",
 
 ###############################################################################################################################
 
-process.p = cms.Path(process.slimmedElectronsUpdated * process.isoForEle * process.egmGsfElectronIDs * process.bitmapVIDForEle * process.ptRatioRelForEle * process.slimmedElectronsWithUserData * process.slimmedMuonsUpdated * process.isoForMu * process.ptRatioRelForMu * process.slimmedMuonsWithUserData * process.QGTagger * process.slimmedJetsWithUserData * process.SHOTProducer)
+process.p = cms.Path(process.slimmedElectronsUpdated * process.isoForEle * process.egmGsfElectronIDs * process.bitmapVIDForEle * process.ptRatioRelForEle * process.slimmedElectronsWithUserData * process.slimmedMuonsUpdated * process.isoForMu * process.ptRatioRelForMu * process.slimmedMuonsWithUserData * process.slimmedJetsWithUserData * process.SHOTProducer)
 process.endP = cms.EndPath(process.out)
-

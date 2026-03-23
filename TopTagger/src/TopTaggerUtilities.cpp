@@ -21,9 +21,9 @@ namespace ttUtility
         hadGenTopDaughters_ = &hadGenTopDaughters;
     }
 
-    std::vector<Constituent> packageConstituents(const std::vector<TLorentzVector>& jetsLVec, const std::vector<double>& btagFactors, const std::vector<double>& qgLikelihood)
+    std::vector<Constituent> packageConstituents(const std::vector<TLorentzVector>& jetsLVec, const std::vector<double>& btagFactors)
     {
-        return packageConstituents(ConstAK4Inputs<double>(jetsLVec, btagFactors, qgLikelihood));
+        return packageConstituents(ConstAK4Inputs<double>(jetsLVec, btagFactors));
     }
 
 
@@ -107,6 +107,7 @@ namespace ttUtility
 
     inline double relu(const double x, const double bias = 0.0)
     {
+      //std::cout << "in relu" << std::endl;
         return (x > bias)?x:0.0;
     }
 
@@ -260,11 +261,6 @@ namespace ttUtility
         {
             j_m_lab_[i] = -1;
             j_CSV_lab_[i] = -1;
-            j_QGL_lab_[i] = -1;
-            j_qgMult_lab_[i] = -1;
-            j_qgPtD_lab_[i] = -1;
-            j_qgAxis1_lab_[i] = -1;
-            j_qgAxis2_lab_[i] = -1;
             j_CvsL_lab_[i] = -1;
             dR12_lab_[i] = -1;
             dR12_3_lab_[i] = -1;
@@ -278,12 +274,7 @@ namespace ttUtility
             j_pt_lab_[i] = -1;
             j_m_[i] = -1;
             j_CSV_[i] = -1;
-            j_QGL_[i] = -1;
             j_recoJetsJecScaleRawToFull_[i] = -1;
-            j_qgLikelihood_[i] = -1;
-            j_qgPtD_[i] = -1;
-            j_qgAxis1_[i] = -1;
-            j_qgAxis2_[i] = -1;
             j_recoJetschargedHadronEnergyFraction_[i] = -1;
             j_recoJetschargedEmEnergyFraction_[i] = -1;
             j_recoJetsneutralEmEnergyFraction_[i] = -1;
@@ -291,32 +282,25 @@ namespace ttUtility
             j_recoJetsHFHadronEnergyFraction_[i] = -1;
             j_recoJetsHFEMEnergyFraction_[i] = -1;
             j_recoJetsneutralEnergyFraction_[i] = -1;
-            j_PhotonEnergyFraction_[i] = -1;
-            j_ElectronEnergyFraction_[i] = -1;
-            j_ChargedHadronMultiplicity_[i] = -1;
-            j_NeutralHadronMultiplicity_[i] = -1;
-            j_PhotonMultiplicity_[i] = -1;
+            j_ChargedMultiplicity_[i] = -1;
+            j_NeutralMultiplicity_[i] = -1;
             j_ElectronMultiplicity_[i] = -1;
             j_MuonMultiplicity_[i] = -1;
-            j_DeepCSVb_[i] = -1;
-            j_DeepCSVc_[i] = -1;
-            j_DeepCSVl_[i] = -1;
-            j_DeepCSVbb_[i] = -1;
-            j_DeepCSVcc_[i] = -1;
-            j_DeepFlavorb_[i] = -1;
-            j_DeepFlavorbb_[i] = -1;
-            j_DeepFlavorlepb_[i] = -1;
-            j_DeepFlavorc_[i] = -1;
-            j_DeepFlavoruds_[i] = -1;
-            j_DeepFlavorg_[i] = -1;
-            j_CvsL_[i] = -1;
-            j_CvsB_[i] = -1;
+	    j_TotalMultiplicity_[i] = -1;
+	    j_btagUParTAK4CvB_[i] = -1;
+	    j_btagUParTAK4CvL_[i] = -1;
+	    j_btagUParTAK4CvNotB_[i] = -1;
+	    j_btagUParTAK4QvG_[i] = -1;
+	    j_btagUParTAK4SvCB_[i] = -1;
+	    j_btagUParTAK4SvUDG_[i] = -1;
+	    j_btagUParTAK4UDG_[i] = -1;
+	    j_btagUParTAK4probb_[i] = -1;
+	    j_btagUParTAK4probbb_[i] = -1;
             j_CombinedSvtx_[i] = -1;
             j_JetProba_[i] = -1;
             j_JetBprob_[i] = -1;
             j_recoJetsBtag_[i] = -1;
             j_recoJetsCharge_[i] = -1;
-            j_qgMult_[i] = -1;
             j_partonFlavor_[i] = -1;
             dTheta_[i] = -1;
             j12_m_[i] = -1;
@@ -325,10 +309,14 @@ namespace ttUtility
 
     void TrijetInputCalculator::mapVars(const std::vector<std::string>& vars)
     {
+      //std::cout << "in MapVars" << std::endl;
         len_ = vars.size();
 
         for(unsigned int j = 0; j < vars.size(); ++j)
         {
+	  if(vars[j].compare("cand_dThetaMin") == 0) {
+	    //std::cout << "cand_dThetaMin found in variables at: " << j << std::endl;
+	  };
             if(vars[j].compare("cand_pt") == 0) cand_pt_ = j;
             if(vars[j].compare("cand_p") == 0) cand_p_ = j;
             if(vars[j].compare("cand_eta") == 0) cand_eta_ = j;
@@ -349,11 +337,6 @@ namespace ttUtility
 
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_m_lab") == 0)                                  j_m_lab_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_CSV_lab") == 0)                                j_CSV_lab_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_QGL_lab") == 0)                                j_QGL_lab_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_qgMult_lab") == 0)                             j_qgMult_lab_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_qgPtD_lab") == 0)                              j_qgPtD_lab_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_qgAxis1_lab") == 0)                            j_qgAxis1_lab_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_qgAxis2_lab") == 0)                            j_qgAxis2_lab_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_CvsL_lab") == 0)                               j_CvsL_lab_[i] = j;
                 if(vars[j].compare("dR" + std::to_string(iMin + 1) + std::to_string(iMax + 1) + "_lab") == 0)     dR12_lab_[i] = j;
                 if(vars[j].compare("dR" + std::to_string(iNNext + 1) + "_" + std::to_string(iMin + 1) + std::to_string(iMax + 1) + "_lab") == 0) dR12_3_lab_[i] = j;
@@ -367,12 +350,7 @@ namespace ttUtility
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_pt_lab") == 0)                                 j_pt_lab_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_m") == 0)                                      j_m_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_CSV") == 0)                                    j_CSV_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_QGL") == 0)                                    j_QGL_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetsJecScaleRawToFull") == 0)              j_recoJetsJecScaleRawToFull_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_qgLikelihood") == 0)                           j_qgLikelihood_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_qgPtD") == 0)                                  j_qgPtD_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_qgAxis1") == 0)                                j_qgAxis1_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_qgAxis2") == 0)                                j_qgAxis2_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetschargedHadronEnergyFraction") == 0)    j_recoJetschargedHadronEnergyFraction_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetschargedEmEnergyFraction") == 0)        j_recoJetschargedEmEnergyFraction_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetsneutralEmEnergyFraction") == 0)        j_recoJetsneutralEmEnergyFraction_[i] = j;
@@ -380,32 +358,25 @@ namespace ttUtility
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetsHFHadronEnergyFraction") == 0)         j_recoJetsHFHadronEnergyFraction_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetsHFEMEnergyFraction") == 0)             j_recoJetsHFEMEnergyFraction_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetsneutralEnergyFraction") == 0)          j_recoJetsneutralEnergyFraction_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_PhotonEnergyFraction") == 0)                   j_PhotonEnergyFraction_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_ElectronEnergyFraction") == 0)                 j_ElectronEnergyFraction_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_ChargedHadronMultiplicity") == 0)              j_ChargedHadronMultiplicity_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_NeutralHadronMultiplicity") == 0)              j_NeutralHadronMultiplicity_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_PhotonMultiplicity") == 0)                     j_PhotonMultiplicity_[i] = j;
+                if(vars[j].compare("j" + std::to_string(i + 1) + "_ChargedMultiplicity") == 0)                    j_ChargedMultiplicity_[i] = j;
+                if(vars[j].compare("j" + std::to_string(i + 1) + "_NeutralMultiplicity") == 0)                    j_NeutralMultiplicity_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_ElectronMultiplicity") == 0)                   j_ElectronMultiplicity_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_MuonMultiplicity") == 0)                       j_MuonMultiplicity_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepCSVb") == 0)                               j_DeepCSVb_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepCSVc") == 0)                               j_DeepCSVc_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepCSVl") == 0)                               j_DeepCSVl_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepCSVbb") == 0)                              j_DeepCSVbb_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepCSVcc") == 0)                              j_DeepCSVcc_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepFlavorb") == 0)                            j_DeepFlavorb_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepFlavorbb") == 0)                           j_DeepFlavorbb_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepFlavorlepb") == 0)                         j_DeepFlavorlepb_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepFlavorc") == 0)                            j_DeepFlavorc_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepFlavoruds") == 0)                          j_DeepFlavoruds_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_DeepFlavorg") == 0)                            j_DeepFlavorg_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_CvsL") == 0)                                   j_CvsL_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_CvsB") == 0)                                   j_CvsB_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_TotalMultiplicity") == 0)                      j_TotalMultiplicity_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4CvB") == 0)                        j_btagUParTAK4CvB_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4CvL") == 0)                        j_btagUParTAK4CvL_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4CvNotB") == 0)                     j_btagUParTAK4CvNotB_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4QvG") == 0)                        j_btagUParTAK4QvG_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4SvCB") == 0)                       j_btagUParTAK4SvCB_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4SvUDG") == 0)                      j_btagUParTAK4SvUDG_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4UDG") == 0)                        j_btagUParTAK4UDG_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4probb") == 0)                      j_btagUParTAK4probb_[i] = j;
+		if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4probbb") == 0)                     j_btagUParTAK4probbb_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_CombinedSvtx") == 0)                           j_CombinedSvtx_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_JetProba") == 0)                               j_JetProba_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_JetBprob") == 0)                               j_JetBprob_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetsBtag") == 0)                           j_recoJetsBtag_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetsCharge") == 0)                         j_recoJetsCharge_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_qgMult") == 0)                                 j_qgMult_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_partonFlavor") == 0)                           j_partonFlavor_[i] = j;
                 if(vars[j].compare("dTheta" + std::to_string(iMin + 1) + std::to_string(iMax + 1)) == 0)          dTheta_[i] = j;
                 if(vars[j].compare("j"   + std::to_string(iMin + 1) + std::to_string(iMax + 1) + "_m") == 0)      j12_m_[i] = j;
@@ -415,8 +386,10 @@ namespace ttUtility
         
     bool TrijetInputCalculator::calculateVars(const TopObject& topCand, int iCand)
     {
+      //std::cout << "in TrijetInputCalculator::calculateVars" << std::endl;
         if(checkCand(topCand))
         {
+	  //std::cout << "in if(checkCand(topCand))" << std::endl;
             //std::map<std::string, double> varMap;
 
             //Get top candidate variables
@@ -429,144 +402,209 @@ namespace ttUtility
             if(cand_dThetaMin_ >= 0) *(basePtr_ + cand_dThetaMin_ + len_*iCand) = topCand.getDThetaMin();
             if(cand_dThetaMax_ >= 0) *(basePtr_ + cand_dThetaMax_ + len_*iCand) = topCand.getDThetaMax();
 
+	    //std::cout << "after get top candidate variables" << std::endl;
             //Get Constituents
             //Get a copy instead of the reference
             std::vector<Constituent const *> top_constituents = topCand.getConstituents();
 
+	    //std::cout << "after std::vector<Constituent const *> top_constituents = topcand.getConstitutents();" << std::endl;
             //resort by CSV
             std::sort(top_constituents.begin(), top_constituents.end(), [](const Constituent * const c1, const Constituent * const c2){ return c1->getBTagDisc() > c2->getBTagDisc(); });
+	    //std::cout << "after std::sort" << std::endl;
             //switch candidates 2 and 3 if they are not in Pt ordering 
             if(top_constituents[2]->p().Pt() > top_constituents[1]->p().Pt())
             {
+	      //std::cout << "in if(top_constituents[2]->p().Pt() > top_constituents[1]->p().Pt())" << std::endl;
                 std::swap(top_constituents[1], top_constituents[2]);
+		//std::cout << "after std::swap" << std::endl;
             }
 
+	    //std::cout << "\ntop_constituents.size(): " << top_constituents.size() << std::endl;
             //Get constituent variables before deboost
             for(unsigned int i = 0; i < top_constituents.size(); ++i)
             {
+	      //std::cout << "i: " << i << " in for(unsigned int i = 0; i < top_constituents.size(); ++i)" << std::endl;
                 if(j_m_lab_[i] >= 0)       *(basePtr_ + j_m_lab_[i] + len_*iCand)       = top_constituents[i]->p().M();
+		//std::cout << "after if(j_m_lab_[i] >= 0" << std::endl;
                 if(j_CSV_lab_[i] >= 0)     *(basePtr_ + j_CSV_lab_[i] + len_*iCand)     = top_constituents[i]->getBTagDisc();
-                if(j_QGL_lab_[i] >= 0)      *(basePtr_ + j_QGL_lab_[i] + len_*iCand)      = relu(top_constituents[i]->getExtraVar("qgLikelihood"));
-                if(j_qgPtD_lab_[i] >= 0)    *(basePtr_ + j_qgPtD_lab_[i] + len_*iCand)    = relu(top_constituents[i]->getExtraVar("qgPtD"));
-                if(j_qgAxis1_lab_[i] >= 0)  *(basePtr_ + j_qgAxis1_lab_[i] + len_*iCand)  = relu(top_constituents[i]->getExtraVar("qgAxis1"));
-                if(j_qgAxis2_lab_[i] >= 0)  *(basePtr_ + j_qgAxis2_lab_[i] + len_*iCand)  = relu(top_constituents[i]->getExtraVar("qgAxis2"));
-                if(j_qgMult_lab_[i] >= 0)   *(basePtr_ + j_qgMult_lab_[i] + len_*iCand)   = relu(top_constituents[i]->getExtraVar("qgMult"));            
+		//std::cout << "after if(j_CSV_lab_[i] >= 0)" << std::endl;
                 if(j_CvsL_lab_[i] >= 0)     *(basePtr_ + j_CvsL_lab_[i] + len_*iCand)     = relu(top_constituents[i]->getExtraVar("CvsL"));
+		//std::cout << "after if(j_CvsL_lab_[i] >= 0)" << std::endl;
 
                 //index of next jet (assumes < 4 jets)
                 unsigned int iNext = (i + 1) % top_constituents.size();
                 unsigned int iNNext = (i + 2) % top_constituents.size();
+		//std::cout << "after iNNext" << std::endl;
                 //unsigned int iMin = std::min(i, iNext);
                 //unsigned int iMax = std::max(i, iNext);
 
                 //Calculate the angle variables
                 if(dR12_lab_[i] >= 0)   *(basePtr_ + dR12_lab_[i] + len_*iCand)   = ROOT::Math::VectorUtil::DeltaR(top_constituents[i]->p(), top_constituents[iNext]->p());
+		//std::cout << "after if(dR12_lab_[i] >= 0)" << std::endl;
                 if(dR12_3_lab_[i] >= 0) *(basePtr_ + dR12_3_lab_[i] + len_*iCand) = ROOT::Math::VectorUtil::DeltaR(top_constituents[iNNext]->p(), top_constituents[i]->p() + top_constituents[iNext]->p());
+		//std::cout << "after if(dR12_3_lab_[i] >= 0)" << std::endl;
 
                 //calculate pair masses
                 auto jetPair = top_constituents[i]->p() + top_constituents[iNext]->p();
+		//std::cout << "after auto jetPair=" << std::endl;
                 if(j12_m_lab_[i] >= 0) *(basePtr_ + j12_m_lab_[i] + len_*iCand) = jetPair.M();
+		//std::cout << "after if(j12_m_lab_[i] >= 0)" << std::endl << std::endl;
             }
 
+	    //std::cout << "after for(unsigned int i = 0; i < top_constituents.size(); ++i)" << std::endl;
             if(dRPtTop_ >= 0) *(basePtr_ + dRPtTop_ + len_*iCand) = ROOT::Math::VectorUtil::DeltaR(top_constituents[0]->p(), top_constituents[1]->p() + top_constituents[2]->p()) * topCand.p().Pt();
+	    //std::cout << "after if(dRPtTop_ >= 0)" << std::endl;
             if(dRPtW_ >= 0) *(basePtr_ + dRPtW_ + len_*iCand) = ROOT::Math::VectorUtil::DeltaR(top_constituents[1]->p(), top_constituents[2]->p()) * (top_constituents[1]->p() + top_constituents[2]->p()).Pt();
+	    //std::cout << "after if(dRPtW_ >=0)" << std::endl;
             if(sd_n2_ >= 0) 
             {
+	      //std::cout << "in if(sd_n2_ >= 0)" << std::endl;
                 double var_sd_0 = top_constituents[2]->p().Pt()/(top_constituents[1]->p().Pt()+top_constituents[2]->p().Pt());
+		//std::cout << "after double var_sd_0" << std::endl;
                 double var_WdR = ROOT::Math::VectorUtil::DeltaR(top_constituents[1]->p(), top_constituents[2]->p());
+		//std::cout << "after double var_WdR" << std::endl;
                 *(basePtr_ + sd_n2_ + len_*iCand) = var_sd_0 / pow(var_WdR, -2);
+		//std::cout << "end if(sd_n2_ >= 0)" << std::endl;
             }
+	    //std::cout << "after if(sd_n2_ >= 0)" << std::endl;
 
             std::vector<Constituent> RF_constituents;
+	    //std::cout << "after std::vector<Constitent> RF_constituents;" << std::endl;
 
             for(const auto& constitutent : top_constituents)
             {
+	      //std::cout << "in for(const auto& constitutent : top_constituents)" << std::endl;
                 TLorentzVector p4(constitutent->p());
+		//std::cout << "after TLorentzVector p4(constitutent->p());" << std::endl;
                 p4.Boost(-topCand.p().BoostVector());
+		//std::cout << "after p4.Boost(-topCand.p().BoostVector());" << std::endl;
                 RF_constituents.emplace_back(*constitutent);
+		//std::cout << "after RF_constitents.emplace_back(*constitutent);" << std::endl;
                 RF_constituents.back().setP(p4);
+		//std::cout << "after RF_contituents.back().setP(p4);" << std::endl << std::endl;
             }
+	    //std::cout << "after for(const auto& constitutent : top_constituents)" << std::endl;
 
             //re-sort constituents by p after deboosting
             std::sort(RF_constituents.begin(), RF_constituents.end(), [](const Constituent& c1, const Constituent& c2){ return c1.p().P() > c2.p().P(); });
+	    //std::cout << "after re-sort constituents by p after deboosting" << std::endl;
 
+	    //std::cout << "b4 for(unsigned int i = 0; i < RF_constituents.size(); ++i)" << std::endl;
             //Get constituent variables
             for(unsigned int i = 0; i < RF_constituents.size(); ++i)
             {
+	      //std::cout << "in for(unsigned int i = 0; i < RF.constituents.size(); ++i)" << std::endl;
                 if(j_p_[i] >= 0) *(basePtr_ + j_p_[i] + len_*iCand)     = RF_constituents[i].p().P();
+		//std::cout << "after if(j_p_[i] >= 0)" << std::endl;
 
                 //This is a bit silly
                 TLorentzVector p4(RF_constituents[i].p());
+		//std::cout << "after TLorentzVector p4(RF_constituents[i].p());" << std::endl;
                 p4.Boost(topCand.p().BoostVector());
+		//std::cout << "after p4.Boost(..)" << std::endl;
+		//std::cout << "what follows is a bunch of if statements" << std::endl;
                 if(j_p_top_[i] >= 0)     *(basePtr_ + j_p_top_[i] + len_*iCand)     = p4.P();
+		//std::cout << "j_p_top" << std::endl;
                 if(j_theta_top_[i] >= 0) *(basePtr_ + j_theta_top_[i] + len_*iCand) = topCand.p().Angle(p4.Vect());
+		//std::cout << "j_theta_top" << std::endl;
                 if(j_phi_top_[i] >= 0)   *(basePtr_ + j_phi_top_[i] + len_*iCand)   = ROOT::Math::VectorUtil::DeltaPhi(RF_constituents[i].p(), RF_constituents[0].p());
+		//std::cout << "j_phi_top" << std::endl;
 
                 if(j_phi_lab_[i] >= 0) *(basePtr_ + j_phi_lab_[i] + len_*iCand)   = p4.Phi();
+		//std::cout << "j_phi_lab" << std::endl;
                 if(j_eta_lab_[i] >= 0) *(basePtr_ + j_eta_lab_[i] + len_*iCand)   = p4.Eta();
+		//std::cout << "j_eta_lab" << std::endl;
                 if(j_pt_lab_[i] >= 0)  *(basePtr_ + j_pt_lab_[i] + len_*iCand)    = p4.Pt();
+		//std::cout << "j_pt_lab" << std::endl;
             
                 if(j_m_[i] >= 0)   *(basePtr_ + j_m_[i] + len_*iCand)     = RF_constituents[i].p().M();
+		//std::cout << "j_m" << std::endl;
                 if(j_CSV_[i] >= 0) *(basePtr_ + j_CSV_[i] + len_*iCand)   = RF_constituents[i].getBTagDisc();
-                //Here we fake the QGL if it is a b jet
-                if(j_QGL_[i] >= 0) *(basePtr_ + j_QGL_[i] + len_*iCand)   = RF_constituents[i].getQGLikelihood();
+		//std::cout << "j_CSV" << std::endl;
 
                 if(j_recoJetsJecScaleRawToFull_[i] >= 0)           *(basePtr_ + j_recoJetsJecScaleRawToFull_[i] + len_*iCand)           = relu(RF_constituents[i].getExtraVar("recoJetsJecScaleRawToFull"));
-                if(j_qgLikelihood_[i] >= 0)                        *(basePtr_ + j_qgLikelihood_[i] + len_*iCand)                        = relu(RF_constituents[i].getExtraVar("qgLikelihood"));
-                if(j_qgPtD_[i] >= 0)                               *(basePtr_ + j_qgPtD_[i] + len_*iCand)                               = relu(RF_constituents[i].getExtraVar("qgPtD"));
-                if(j_qgAxis1_[i] >= 0)                             *(basePtr_ + j_qgAxis1_[i] + len_*iCand)                             = relu(RF_constituents[i].getExtraVar("qgAxis1"));
-                if(j_qgAxis2_[i] >= 0)                             *(basePtr_ + j_qgAxis2_[i] + len_*iCand)                             = relu(RF_constituents[i].getExtraVar("qgAxis2"));
+		//std::cout << "j_recoJetsJecScaleRawToFull" << std::endl;
                 if(j_recoJetschargedHadronEnergyFraction_[i] >= 0) *(basePtr_ + j_recoJetschargedHadronEnergyFraction_[i] + len_*iCand) = relu(RF_constituents[i].getExtraVar("recoJetschargedHadronEnergyFraction"));
+		//std::cout << "j_recoJetschargedHadronEnergyFraction" << std::endl;
                 if(j_recoJetschargedEmEnergyFraction_[i] >= 0)     *(basePtr_ + j_recoJetschargedEmEnergyFraction_[i] + len_*iCand)     = relu(RF_constituents[i].getExtraVar("recoJetschargedEmEnergyFraction"));
+		//std::cout << "j_recoJetschargedEmEnergyFraction" << std::endl;
                 if(j_recoJetsneutralEmEnergyFraction_[i] >= 0)     *(basePtr_ + j_recoJetsneutralEmEnergyFraction_[i] + len_*iCand)     = relu(RF_constituents[i].getExtraVar("recoJetsneutralEmEnergyFraction"));
+		//std::cout << "j_recoJetsneutralEmEnergyFraction" << std::endl;
                 if(j_recoJetsmuonEnergyFraction_[i] >= 0)          *(basePtr_ + j_recoJetsmuonEnergyFraction_[i] + len_*iCand)          = relu(RF_constituents[i].getExtraVar("recoJetsmuonEnergyFraction"));
+		//std::cout << "j_recoJetsmuonEnergyFraction" << std::endl;
                 if(j_recoJetsHFHadronEnergyFraction_[i] >= 0)      *(basePtr_ + j_recoJetsHFHadronEnergyFraction_[i] + len_*iCand)      = relu(RF_constituents[i].getExtraVar("recoJetsHFHadronEnergyFraction"));
+		//std::cout << "j_recoJetsHFHadronEnergyFraction" << std::endl;
                 if(j_recoJetsHFEMEnergyFraction_[i] >= 0)          *(basePtr_ + j_recoJetsHFEMEnergyFraction_[i] + len_*iCand)          = relu(RF_constituents[i].getExtraVar("recoJetsHFEMEnergyFraction"));
+		//std::cout << "j_recoJetsHFEMenergyFraction" << std::endl;
                 if(j_recoJetsneutralEnergyFraction_[i] >= 0)       *(basePtr_ + j_recoJetsneutralEnergyFraction_[i] + len_*iCand)       = relu(RF_constituents[i].getExtraVar("recoJetsneutralEnergyFraction"));
-                if(j_PhotonEnergyFraction_[i] >= 0)                *(basePtr_ + j_PhotonEnergyFraction_[i] + len_*iCand)                = relu(RF_constituents[i].getExtraVar("PhotonEnergyFraction"));
-                if(j_ElectronEnergyFraction_[i] >= 0)              *(basePtr_ + j_ElectronEnergyFraction_[i] + len_*iCand)              = relu(RF_constituents[i].getExtraVar("ElectronEnergyFraction"));
-                if(j_ChargedHadronMultiplicity_[i] >= 0)           *(basePtr_ + j_ChargedHadronMultiplicity_[i] + len_*iCand)           = relu(RF_constituents[i].getExtraVar("ChargedHadronMultiplicity"));
-                if(j_NeutralHadronMultiplicity_[i] >= 0)           *(basePtr_ + j_NeutralHadronMultiplicity_[i] + len_*iCand)           = relu(RF_constituents[i].getExtraVar("NeutralHadronMultiplicity"));
-                if(j_PhotonMultiplicity_[i] >= 0)                  *(basePtr_ + j_PhotonMultiplicity_[i] + len_*iCand)                  = relu(RF_constituents[i].getExtraVar("PhotonMultiplicity"));
+		//std::cout << "j_recoJetsneutralEnergyFraction" << std::endl;
+                if(j_ChargedMultiplicity_[i] >= 0)                 *(basePtr_ + j_ChargedMultiplicity_[i] + len_*iCand)                 = relu(RF_constituents[i].getExtraVar("ChargedMultiplicity"));
+		//std::cout << "j_ChargedMultiplicity" << std::endl;
+                if(j_NeutralMultiplicity_[i] >= 0)                 *(basePtr_ + j_NeutralMultiplicity_[i] + len_*iCand)                 = relu(RF_constituents[i].getExtraVar("NeutralMultiplicity"));
+		//std::cout << "j_NeutralMultiplicity" << std::endl;
                 if(j_ElectronMultiplicity_[i] >= 0)                *(basePtr_ + j_ElectronMultiplicity_[i] + len_*iCand)                = relu(RF_constituents[i].getExtraVar("ElectronMultiplicity"));
+		//std::cout << "j_ElectronMultiplicity" << std::endl;
                 if(j_MuonMultiplicity_[i] >= 0)                    *(basePtr_ + j_MuonMultiplicity_[i] + len_*iCand)                    = relu(RF_constituents[i].getExtraVar("MuonMultiplicity"));
-                if(j_DeepCSVb_[i] >= 0)                            *(basePtr_ + j_DeepCSVb_[i] + len_*iCand)                            = relu(RF_constituents[i].getExtraVar("DeepCSVb"));
-                if(j_DeepCSVc_[i] >= 0)                            *(basePtr_ + j_DeepCSVc_[i] + len_*iCand)                            = relu(RF_constituents[i].getExtraVar("DeepCSVc"));
-                if(j_DeepCSVl_[i] >= 0)                            *(basePtr_ + j_DeepCSVl_[i] + len_*iCand)                            = relu(RF_constituents[i].getExtraVar("DeepCSVl"));
-                if(j_DeepCSVbb_[i] >= 0)                           *(basePtr_ + j_DeepCSVbb_[i] + len_*iCand)                           = relu(RF_constituents[i].getExtraVar("DeepCSVbb"));
-                if(j_DeepCSVcc_[i] >= 0)                           *(basePtr_ + j_DeepCSVcc_[i] + len_*iCand)                           = 0.0;
-                if(j_DeepFlavorb_[i] >= 0)                         *(basePtr_ + j_DeepFlavorb_[i] + len_*iCand)                         = relu(RF_constituents[i].getExtraVar("DeepFlavorb"));
-                if(j_DeepFlavorbb_[i] >= 0)                        *(basePtr_ + j_DeepFlavorbb_[i] + len_*iCand)                        = relu(RF_constituents[i].getExtraVar("DeepFlavorbb"));
-                if(j_DeepFlavorlepb_[i] >= 0)                      *(basePtr_ + j_DeepFlavorlepb_[i] + len_*iCand)                      = relu(RF_constituents[i].getExtraVar("DeepFlavorlepb"));
-                if(j_DeepFlavorc_[i] >= 0)                         *(basePtr_ + j_DeepFlavorc_[i] + len_*iCand)                         = relu(RF_constituents[i].getExtraVar("DeepFlavorc"));
-                if(j_DeepFlavoruds_[i] >= 0)                       *(basePtr_ + j_DeepFlavoruds_[i] + len_*iCand)                       = relu(RF_constituents[i].getExtraVar("DeepFlavoruds"));
-                if(j_DeepFlavorg_[i] >= 0)                         *(basePtr_ + j_DeepFlavorg_[i] + len_*iCand)                         = relu(RF_constituents[i].getExtraVar("DeepFlavorg"));
-                if(j_CvsL_[i] >= 0)                                *(basePtr_ + j_CvsL_[i] + len_*iCand)                                = relu(RF_constituents[i].getExtraVar("CvsL"));
-                if(j_CvsB_[i] >= 0)                                *(basePtr_ + j_CvsB_[i] + len_*iCand)                                = relu(RF_constituents[i].getExtraVar("CvsB"));
+		//std::cout << "j_MuonMultiplicity" << std::endl;
+		if(j_TotalMultiplicity_[i] >= 0)                   *(basePtr_ + j_TotalMultiplicity_[i] + len_*iCand)                   = relu(RF_constituents[i].getExtraVar("TotalMultiplicity"));
+		//std::cout << "j_TotalMultiplicity" << std::endl;
+		//std::cout << "j_TotalMultiplicity_[i]: " << j_TotalMultiplicity_[i] << std::endl;
+
+		//std::cout << "j_btagUParTAK4CvB_[i]: " << j_btagUParTAK4CvB_[i] << std::endl;
+		//std::cout << "basePtr_: " << basePtr_ << " | len_: " << len_ << " | iCand: " << iCand << std::endl;
+		if(j_btagUParTAK4CvB_[i] >= 0)                     *(basePtr_ + j_btagUParTAK4CvB_[i] + len_*iCand)                     = relu(RF_constituents[i].getExtraVar("btagUParTAK4CvB"));
+
+		//std::cout << "j_btagUParTAK4CvB" << std::endl;
+		if(j_btagUParTAK4CvL_[i] >= 0)                     *(basePtr_ + j_btagUParTAK4CvL_[i] + len_*iCand)                     = relu(RF_constituents[i].getExtraVar("btagUParTAK4CvL"));
+		//std::cout << "j_btagUParTAK4CvL" << std::endl;
+		if(j_btagUParTAK4CvNotB_[i] >= 0)                  *(basePtr_ + j_btagUParTAK4CvNotB_[i] + len_*iCand)                  = relu(RF_constituents[i].getExtraVar("btagUParTAK4CvNotB"));
+		//std::cout << "j_btagUParTAK4CvNotB" << std::endl;
+		if(j_btagUParTAK4QvG_[i] >= 0)                     *(basePtr_ + j_btagUParTAK4QvG_[i] + len_*iCand)                     = relu(RF_constituents[i].getExtraVar("btagUParTAK4QvG"));
+		//std::cout << "j_btagUParTAK4QvG" << std::endl;
+		if(j_btagUParTAK4SvCB_[i] >= 0)                    *(basePtr_ + j_btagUParTAK4SvCB_[i] + len_*iCand)                    = relu(RF_constituents[i].getExtraVar("btagUParTAK4SvCB"));
+		//std::cout << "j_btagUParTAK4SvCB" << std::endl;
+		if(j_btagUParTAK4SvUDG_[i] >= 0)                   *(basePtr_ + j_btagUParTAK4SvUDG_[i] + len_*iCand)                   = relu(RF_constituents[i].getExtraVar("btagUParTAK4SvUDG"));
+		//std::cout << "j_btagUParTAK4SvUDG" << std::endl;
+		if(j_btagUParTAK4UDG_[i] >= 0)                     *(basePtr_ + j_btagUParTAK4UDG_[i] + len_*iCand)                     = relu(RF_constituents[i].getExtraVar("btagUParTAK4UDG"));
+		//std::cout << "j_btagUParTAK4UDG" << std::endl;
+		if(j_btagUParTAK4probb_[i] >= 0)                   *(basePtr_ + j_btagUParTAK4probb_[i] + len_*iCand)                   = relu(RF_constituents[i].getExtraVar("btagUParTAK4probb"));
+		//std::cout << "j_btagUParTAK4probb" << std::endl;
+		if(j_btagUParTAK4probbb_[i] >= 0)                  *(basePtr_ + j_btagUParTAK4probbb_[i] + len_*iCand)                  = relu(RF_constituents[i].getExtraVar("btagUParTAK4probbb"));
+		//std::cout << "j_btagUParTAK4probbb" << std::endl;
                 if(j_CombinedSvtx_[i] >= 0)                        *(basePtr_ + j_CombinedSvtx_[i] + len_*iCand)                        = relu(RF_constituents[i].getExtraVar("CombinedSvtx"));
+		//std::cout << "j_CombinedSvtx" << std::endl;
                 if(j_JetProba_[i] >= 0)                            *(basePtr_ + j_JetProba_[i] + len_*iCand)                            = relu(RF_constituents[i].getExtraVar("JetProba"));
+		//std::cout << "j_JetProba" << std::endl;
                 if(j_JetBprob_[i] >= 0)                            *(basePtr_ + j_JetBprob_[i] + len_*iCand)                            = relu(RF_constituents[i].getExtraVar("JetBprob"));
+		//std::cout << "j_JetBprob" << std::endl;
                 if(j_recoJetsBtag_[i] >= 0)                        *(basePtr_ + j_recoJetsBtag_[i] + len_*iCand)                        = relu(RF_constituents[i].getExtraVar("recoJetsBtag"));
+		//std::cout << "j_recoJetsBtag" << std::endl;
                 if(j_recoJetsCharge_[i] >= 0)                      *(basePtr_ + j_recoJetsCharge_[i] + len_*iCand)                      = relu(RF_constituents[i].getExtraVar("recoJetsCharge"), -2);
-                if(j_qgMult_[i] >= 0)                              *(basePtr_ + j_qgMult_[i] + len_*iCand)                              = relu(RF_constituents[i].getExtraVar("qgMult"));
+		//std::cout << "j_recoJetsCharge" << std::endl;
                 if(j_partonFlavor_[i] >= 0)                        *(basePtr_ + j_partonFlavor_[i] + len_*iCand)                        = relu(RF_constituents[i].getExtraVar("partonFlavor"), -22);
+		//std::cout << "j_partonFlavor" << std::endl;
+		//std::cout << "after bunch of if statements" << std::endl;
 
                 //index of next jet (assumes < 4 jets)
                 unsigned int iNext = (i + 1) % RF_constituents.size();
                 unsigned int iMin = std::min(i, iNext);
                 unsigned int iMax = std::max(i, iNext);
+		//std::cout << "after get iNext, iMin, iMax" << std::endl;
 
                 //Calculate delta angle variables
                 if(dTheta_[i] >= 0) *(basePtr_ + dTheta_[i] + len_*iCand) = RF_constituents[iMin].p().Angle(RF_constituents[iMax].p().Vect());
+		//std::cout << "after if(dTheta_[i] >= 0)" << std::endl;
 
                 //calculate pair masses
                 auto jetPair = RF_constituents[i].p() + RF_constituents[iNext].p();
+		//std::cout << "after auto jetPair" << std::endl;
                 if(j12_m_[i] >= 0) *(basePtr_ + j12_m_[i] + len_*iCand) = jetPair.M();
+		//std::cout << "after if(j12_m_[i] >= 0)" << std::endl;
             }
-                
+	    //std::cout << "return true" << std::endl;
             return true;
         }
-            
+	//std::cout << "return false" << std::endl;    
         return false;
     }
 
@@ -605,10 +643,6 @@ namespace ttUtility
                     "j13_m_lab",
 
                     "j1_recoJetsJecScaleRawToFull",
-                    "j1_qgLikelihood",
-                    "j1_qgPtD",
-                    "j1_qgAxis1",
-                    "j1_qgAxis2",
                     "j1_recoJetschargedHadronEnergyFraction",
                     "j1_recoJetschargedEmEnergyFraction",
                     "j1_recoJetsneutralEmEnergyFraction",
@@ -616,51 +650,35 @@ namespace ttUtility
                     "j1_recoJetsHFHadronEnergyFraction",
                     "j1_recoJetsHFEMEnergyFraction",
                     "j1_recoJetsneutralEnergyFraction",
-                    "j1_PhotonEnergyFraction",
-                    "j1_ElectronEnergyFraction",
-                    "j1_ChargedHadronMultiplicity",
-                    "j1_NeutralHadronMultiplicity",
-                    "j1_PhotonMultiplicity",
+                    "j1_ChargedMultiplicity",
+                    "j1_NeutralMultiplicity",
                     "j1_ElectronMultiplicity",
                     "j1_MuonMultiplicity",
-                    "j1_DeepCSVb",
-                    "j1_DeepCSVc",
-                    "j1_DeepCSVl",
-                    "j1_DeepCSVbb",
-                    "j1_DeepCSVcc",
-                    "j1_DeepFlavorb",
-                    "j1_DeepFlavorbb",
-                    "j1_DeepFlavorlepb",
-                    "j1_DeepFlavorc",
-                    "j1_DeepFlavoruds",
-                    "j1_DeepFlavorg",
-                    "j1_CvsL",
-                    "j1_CvsB",
+	      "j1_TotalMultiplicity",
+	            "j1_btagUParTAK4CvB",
+	      "j1_btagUParTAK4CvL",
+	      "j1_btagUParTAK4CvNotB",
+	      "j1_btagUParTAK4QvG",
+	      "j1_btagUParTAK4SvCB",
+	      "j1_btagUParTAK4SvUDG",
+	      "j1_btagUParTAK4UDG",
+	      "j1_btagUParTAK4probb",
+	      "j1_btagUParTAK4probbb",
                     "j1_CombinedSvtx",
                     "j1_JetProba",
                     "j1_JetBprob",
                     "j1_recoJetsBtag",
                     "j1_recoJetsCharge",
-                    "j1_qgMult",
                     "j1_CSV",
                     "j1_CSV_lab",
-                    "j1_QGL",
-                    "j1_QGL_lab",
                     "j1_eta_lab",
                     "j1_m",
                     "j1_m_lab",
                     "j1_p",
                     "j1_phi_lab",
                     "j1_pt_lab",
-                    "j1_qgAxis1_lab",
-                    "j1_qgAxis2_lab",
-                    "j1_qgMult_lab",
-                    "j1_qgPtD_lab",
+
                     "j2_recoJetsJecScaleRawToFull",
-                    "j2_qgLikelihood",
-                    "j2_qgPtD",
-                    "j2_qgAxis1",
-                    "j2_qgAxis2",
                     "j2_recoJetschargedHadronEnergyFraction",
                     "j2_recoJetschargedEmEnergyFraction",
                     "j2_recoJetsneutralEmEnergyFraction",
@@ -668,52 +686,35 @@ namespace ttUtility
                     "j2_recoJetsHFHadronEnergyFraction",
                     "j2_recoJetsHFEMEnergyFraction",
                     "j2_recoJetsneutralEnergyFraction",
-                    "j2_PhotonEnergyFraction",
-                    "j2_ElectronEnergyFraction",
-                    "j2_ChargedHadronMultiplicity",
-                    "j2_NeutralHadronMultiplicity",
-                    "j2_PhotonMultiplicity",
+                    "j2_ChargedMultiplicity",
+                    "j2_NeutralMultiplicity",
                     "j2_ElectronMultiplicity",
                     "j2_MuonMultiplicity",
-                    "j2_DeepCSVb",
-                    "j2_DeepCSVc",
-                    "j2_DeepCSVl",
-                    "j2_DeepCSVbb",
-                    "j2_DeepCSVcc",
-                    "j2_DeepFlavorb",
-                    "j2_DeepFlavorbb",
-                    "j2_DeepFlavorlepb",
-                    "j2_DeepFlavorc",
-                    "j2_DeepFlavoruds",
-                    "j2_DeepFlavorg",
-                    "j2_CvsL",
-                    "j2_CvsB",
+	      "j2_TotalMultiplicity",
+	      "j2_btagUParTAK4CvB",
+	      "j2_btagUParTAK4CvL",
+	      "j2_btagUParTAK4CvNotB",
+	      "j2_btagUParTAK4QvG",
+	      "j2_btagUParTAK4SvCB",
+	      "j2_btagUParTAK4SvUDG",
+	      "j2_btagUParTAK4UDG",
+	      "j2_btagUParTAK4probb",
+	      "j2_btagUParTAK4probbb",
                     "j2_CombinedSvtx",
                     "j2_JetProba",
                     "j2_JetBprob",
                     "j2_recoJetsBtag",
                     "j2_recoJetsCharge",
-                    "j2_qgMult",
                     "j2_CSV",
                     "j2_CSV_lab",
-                    "j2_QGL",
-                    "j2_QGL_lab",
                     "j2_eta_lab",
                     "j2_m",
                     "j2_m_lab",
                     "j2_p",
                     "j2_phi_lab",
                     "j2_pt_lab",
-                    "j2_qgAxis1_lab",
-                    "j2_qgAxis2_lab",
-                    "j2_qgMult_lab",
-                    "j2_qgPtD_lab",
 
                     "j3_recoJetsJecScaleRawToFull",
-                    "j3_qgLikelihood",
-                    "j3_qgPtD",
-                    "j3_qgAxis1",
-                    "j3_qgAxis2",
                     "j3_recoJetschargedHadronEnergyFraction",
                     "j3_recoJetschargedEmEnergyFraction",
                     "j3_recoJetsneutralEmEnergyFraction",
@@ -721,46 +722,33 @@ namespace ttUtility
                     "j3_recoJetsHFHadronEnergyFraction",
                     "j3_recoJetsHFEMEnergyFraction",
                     "j3_recoJetsneutralEnergyFraction",
-                    "j3_PhotonEnergyFraction",
-                    "j3_ElectronEnergyFraction",
-                    "j3_ChargedHadronMultiplicity",
-                    "j3_NeutralHadronMultiplicity",
-                    "j3_PhotonMultiplicity",
+                    "j3_ChargedMultiplicity",
+                    "j3_NeutralMultiplicity",
                     "j3_ElectronMultiplicity",
                     "j3_MuonMultiplicity",
-                    "j3_DeepCSVb",
-                    "j3_DeepCSVc",
-                    "j3_DeepCSVl",
-                    "j3_DeepCSVbb",
-                    "j3_DeepCSVcc",
-                    "j3_DeepFlavorb",
-                    "j3_DeepFlavorbb",
-                    "j3_DeepFlavorlepb",
-                    "j3_DeepFlavorc",
-                    "j3_DeepFlavoruds",
-                    "j3_DeepFlavorg",
-                    "j3_CvsL",
-                    "j3_CvsB",
+	      "j3_TotalMultiplicity",
+	      "j3_btagUParTAK4CvB",
+	      "j3_btagUParTAK4CvL",
+	      "j3_btagUParTAK4CvNotB",
+	      "j3_btagUParTAK4QvG",
+	      "j3_btagUParTAK4SvCB",
+	      "j3_btagUParTAK4SvUDG",
+	      "j3_btagUParTAK4UDG",
+	      "j3_btagUParTAK4probb",
+	      "j3_btagUParTAK4probbb",
                     "j3_CombinedSvtx",
                     "j3_JetProba",
                     "j3_JetBprob",
                     "j3_recoJetsBtag",
                     "j3_recoJetsCharge",
-                    "j3_qgMult",
                     "j3_CSV",
                     "j3_CSV_lab",
-                    "j3_QGL",
-                    "j3_QGL_lab",
                     "j3_eta_lab",
                     "j3_m",
                     "j3_m_lab",
                     "j3_p",
                     "j3_phi_lab",
                     "j3_pt_lab",
-                    "j3_qgAxis1_lab",
-                    "j3_qgAxis2_lab",
-                    "j3_qgMult_lab",
-                    "j3_qgPtD_lab",
 
                     "j23_m",
                     "j23_m_lab",

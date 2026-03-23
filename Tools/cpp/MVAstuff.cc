@@ -90,7 +90,6 @@ int main(int argc, char* argv[]) {
     const vector<int> &genDecayMomIdxVec = tr->getVec<int>("genDecayMomIdxVec");
     const vector<TLorentzVector> &jetsLVec = tr->getVec<TLorentzVector>("jetsLVec");
     const vector<double> &recoJetsBtag_0 = tr->getVec<double>("recoJetsBtag_0");
-    const std::vector<double>& qgLikelihood      = tr->getVec<double>("qgLikelihood");
     const std::vector<double>& recoJetsCharge      = tr->getVec<double>("recoJetsCharge_0");
 
     double met=tr->getVar<double>("met");
@@ -121,12 +120,11 @@ int main(int argc, char* argv[]) {
       }
     std::vector<TLorentzVector> jetsLVec_forTagger;
     std::vector<double> recoJetsBtag_forTagger;
-    std::vector<double> qgLikelihood_forTagger;
-    AnaFunctions::prepareJetsForTagger(jetsLVec, recoJetsBtag_0, jetsLVec_forTagger, recoJetsBtag_forTagger, qgLikelihood, qgLikelihood_forTagger);
+    AnaFunctions::prepareJetsForTagger(jetsLVec, recoJetsBtag_0, jetsLVec_forTagger, recoJetsBtag_forTagger);
     
     // top tagger
     //construct vector of constituents 
-    vector<Constituent> constituents = ttUtility::packageConstituents(jetsLVec_forTagger, recoJetsBtag_forTagger, qgLikelihood_forTagger);
+    vector<Constituent> constituents = ttUtility::packageConstituents(jetsLVec_forTagger, recoJetsBtag_forTagger);
     //run tagger
     tt.runTagger(constituents);
     //get output of tagger

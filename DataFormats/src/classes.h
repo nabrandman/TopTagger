@@ -6,6 +6,8 @@
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "/cvmfs/sft.cern.ch/lcg/releases/LCG_105/clhep/2.4.7.1/x86_64-centos7-gcc11-opt/include/CLHEP/Matrix/Vector.h"
+#include "/cvmfs/sft.cern.ch/lcg/releases/LCG_105/clhep/2.4.7.1/x86_64-centos7-gcc11-opt/include/CLHEP/Matrix/Matrix.h"
 #include "DataFormats/PatCandidates/interface/UserData.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"

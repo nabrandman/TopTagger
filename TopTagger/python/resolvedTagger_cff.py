@@ -7,21 +7,6 @@ def prepareJets(process):
     jetsWithUserData = process.updatedJetsWithUserData
     inputJetCollection = jetsWithUserData.src
 
-    #update jets to include new user float/int    
-    jetUserFloat = jetsWithUserData.userFloats.clone(
-            qgptD   = cms.InputTag("qgtagger:ptD"),
-            qgAxis1 = cms.InputTag("qgtagger:axis1"),
-            qgAxis2 = cms.InputTag("qgtagger:axis2"),
-        )
-
-    jetsWithUserData.userFloats = jetUserFloat
-
-    jetUserInt = jetsWithUserData.userInts.clone(
-            qgMult = cms.InputTag("qgtagger:mult")
-        )
-
-    jetsWithUserData.userInts = jetUserInt
-
     return process
 
 
@@ -45,11 +30,6 @@ def setupResolvedTaggerVariables(process):
             deepFlavouruds  = Var("bDiscriminator('pfDeepFlavourJetTags:probuds')",  float,doc="DeepFlavour light quark discriminator" ,precision=10),
             deepFlavourg    = Var("bDiscriminator('pfDeepFlavourJetTags:probg')",    float,doc="DeepFlavour gluon discriminator"       ,precision=10),
             deepFlavourc    = Var("bDiscriminator('pfDeepFlavourJetTags:probc')",    float,doc="DeepFlavour charm discriminator"       ,precision=10),
-
-            qgptD = Var("userFloat('qgptD')",float,doc="QG Jet ptD",precision=10),
-            qgAxis1 = Var("userFloat('qgAxis1')",float,doc="QG Jet semi major axis",precision=10),
-            qgAxis2 = Var("userFloat('qgAxis2')",float,doc="QG Jet semi minor axis",precision=10),
-            qgMult = Var("userInt('qgMult')",int ,doc="QG constituent multiplicity"),
 
             muEF      = Var("muonEnergyFraction()",        float, doc="muon energy fraction"        ,precision=10),
             phEF      = Var("photonEnergyFraction()",      float, doc="photon energy fraction"      ,precision=10),

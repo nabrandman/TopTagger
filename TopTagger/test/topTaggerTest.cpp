@@ -30,10 +30,6 @@ int main()
     //Each entry in these vectors refers to information for 1 AK4 jet
     std::vector<TLorentzVector>** AK4JetLV = new std::vector<TLorentzVector>*();
     std::vector<float>** AK4JetBtag = new std::vector<float>*();
-    std::vector<float>** AK4qgMult = new std::vector<float>*();
-    std::vector<float>** AK4qgPtD = new std::vector<float>*();
-    std::vector<float>** AK4qgAxis1 = new std::vector<float>*();
-    std::vector<float>** AK4qgAxis2 = new std::vector<float>*();
     std::vector<float>** AK4recoJetschargedHadronEnergyFraction = new std::vector<float>*();
     std::vector<float>** AK4recoJetschargedEmEnergyFraction = new std::vector<float>*();
     std::vector<float>** AK4recoJetsneutralEmEnergyFraction = new std::vector<float>*();
@@ -70,22 +66,6 @@ int main()
     //AK4 jet b-tag values (0 not a b, 1 is a b)
     tree->SetBranchStatus( "ak4recoJetsBtag", 1);
     tree->SetBranchAddress("ak4recoJetsBtag", AK4JetBtag);
-
-    //AK4 qg jet multiplicity
-    tree->SetBranchStatus( "ak4qgMult", 1);
-    tree->SetBranchAddress("ak4qgMult", AK4qgMult);
-
-    //AK4 qg PtD
-    tree->SetBranchStatus( "ak4qgPtD", 1);
-    tree->SetBranchAddress("ak4qgPtD", AK4qgPtD);
-
-    //AK4 qg jet semimajor axis
-    tree->SetBranchStatus( "ak4qgAxis1", 1);
-    tree->SetBranchAddress("ak4qgAxis1", AK4qgAxis1);
-
-    //AK4 qg jet semiminor axis
-    tree->SetBranchStatus( "ak4qgAxis2", 1);
-    tree->SetBranchAddress("ak4qgAxis2", AK4qgAxis2);
 
     //AK4 jet charged hadronic energy fraction 
     tree->SetBranchStatus( "ak4recoJetschargedHadronEnergyFraction", 1);
@@ -206,10 +186,6 @@ int main()
             //Use helper function to create input list 
             //Create AK4 inputs object
             ttUtility::ConstAK4Inputs<float> AK4Inputs(**AK4JetLV, **AK4JetBtag);
-            AK4Inputs.addSupplamentalVector("qgPtD",                                **AK4qgPtD);
-            AK4Inputs.addSupplamentalVector("qgAxis1",                              **AK4qgAxis1);
-            AK4Inputs.addSupplamentalVector("qgAxis2",                              **AK4qgAxis2);
-            AK4Inputs.addSupplamentalVector("qgMult",                               **AK4qgMult);
             AK4Inputs.addSupplamentalVector("recoJetschargedHadronEnergyFraction",  **AK4recoJetschargedHadronEnergyFraction);
             AK4Inputs.addSupplamentalVector("recoJetschargedEmEnergyFraction",      **AK4recoJetschargedEmEnergyFraction);
             AK4Inputs.addSupplamentalVector("recoJetsneutralEmEnergyFraction",      **AK4recoJetsneutralEmEnergyFraction);
@@ -297,10 +273,6 @@ int main()
     //clean up pointers 
     delete AK4JetLV;
     delete AK4JetBtag;
-    delete AK4qgMult;
-    delete AK4qgPtD;
-    delete AK4qgAxis1;
-    delete AK4qgAxis2;
     delete AK4recoJetschargedHadronEnergyFraction;
     delete AK4recoJetschargedEmEnergyFraction;
     delete AK4recoJetsneutralEmEnergyFraction;
