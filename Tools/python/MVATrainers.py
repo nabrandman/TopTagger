@@ -52,14 +52,14 @@ def mainSKL(options):
 #  import xgboost as xgb
   import pickle
 
-  print "PROCESSING TRAINING DATA"
+  print("PROCESSING TRAINING DATA")
 
   from taggerOptions import StandardVariables, getJetVarNames
 
   #get variables 
   globalVars, jetVars = StandardVariables(options.variables)
   allVars = globalVars + getJetVarNames(jetVars)
-  print allVars
+  print(allVars)
 
   # Import data
   #dgSig = DataGetter.DefinedVariables(allVars, signal = True)
@@ -95,10 +95,10 @@ def mainSKL(options):
   #validDataBgQCDData = [(glob("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_0_Data_JetHT_2016_training_0.h5", ), 1)]
   #
   #
-  #print "Input Variables: ",len(dgSig.getList())
+  #print("Input Variables: ",len(dgSig.getList()))
   #
   ## Import data
-  ##print options.runOp.validationSamples
+  ##print(options.runOp.validationSamples)
   #
   #validDataSig =       getValidData(dgSig, validDataSig,       options)
   #validDataBgTTbar =   getValidData(dgBg,  validDataBgTTbar,   options)
@@ -115,7 +115,7 @@ def mainSKL(options):
   dataFiles += glob(options.dataFilePath + "/trainingTuple_TTbarSingleLepT*_20_division_0_TTbarSingleLepT*_training_[01234].h5")
   dataFiles += glob(options.dataFilePath + "/trainingTuple_TTbarSingleLepT*_40_division_0_TTbarSingleLepT*_training_[01234].h5")
   dataFiles += glob(options.dataFilePath + "/trainingTuple_TTbarSingleLepT*_60_division_0_TTbarSingleLepT*_training_[01234].h5")
-  print dataFiles
+  print(dataFiles)
   trainData = dg.importData(samplesToRun = tuple(dataFiles), prescale=True, ptReweight=options.ptReweight)
 
   # Create random forest
@@ -126,7 +126,7 @@ def mainSKL(options):
   #                        scale_pos_weight=1, seed=0, silent=False, subsample=1 )
   clf = RandomForestClassifier(n_estimators=1000, max_depth=10, n_jobs = 28, verbose = True)
 
-  print "TRAINING RF"
+  print("TRAINING RF")
   
   # Train random forest 
   clf = clf.fit(trainData["data"], trainData["labels"][:,0], sample_weight=trainData["weights"][:,0])
@@ -143,7 +143,7 @@ def mainXGB(options):
   import xgboost as xgb
   from taggerOptions import StandardVariables, getJetVarNames
 
-  print "PROCESSING TRAINING DATA"
+  print("PROCESSING TRAINING DATA")
 
   #get variables 
   globalVars, jetVars = StandardVariables(options.variables)
@@ -159,7 +159,7 @@ def mainXGB(options):
   trainData = dg.importData(samplesToRun = tuple(dataFiles), prescale=True, ptReweight=options.ptReweight)
   #= dg.importData(samplesToRun = tuple(glob(options.dataFilePath + "/trainingTuple_TTbarSingleLepT*_0_division_0_TTbarSingleLepT*_training_[0].h5")), prescale=True, ptReweight=options.ptReweight)
 
-  print "TRAINING XGB"
+  print("TRAINING XGB")
 
   # Create xgboost classifier
   # Train random forest 
@@ -180,7 +180,7 @@ def mainTF(options):
   from DataManager import DataManager
   from DataSet import DataSet
 
-  print "PROCESSING VALIDATION DATA"
+  print("PROCESSING VALIDATION DATA")
 
   dgSig = DataGetter.DefinedVariables(options.netOp.vNames, signal = True)
   dgBg = DataGetter.DefinedVariables(options.netOp.vNames, background = True)
@@ -203,10 +203,10 @@ def mainTF(options):
   validDataBgQCDData = [(("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_Data_JetHT_2016_validation_0.h5", ), 1)]
   
 
-  print "Input Variables: ",len(dgSig.getList())
+  print("Input Variables: ",len(dgSig.getList()))
 
   # Import data
-  #print options.runOp.validationSamples
+  #print(options.runOp.validationSamples)
   
   validDataSig =       getValidData(dgSig, validDataSig,       options)
   validDataBgTTbar =   getValidData(dgBg,  validDataBgTTbar,   options)
@@ -218,7 +218,7 @@ def mainTF(options):
   validDataQCDData = combineValidationData(validDataSig, validDataBgQCDData)
 
   #get input/output sizes
-  #print validData["data"].shape
+  #print(validData["data"].shape)
   nFeatures = validDataTTbar["data"].shape[1]
   nLabels = validDataTTbar["labels"].shape[1]
   nWeights = validDataTTbar["weights"].shape[1]
@@ -275,7 +275,7 @@ def mainTF(options):
   #summary writer
   summary_writer = tf.summary.FileWriter(options.runOp.directory + "log_graph", graph=tf.get_default_graph())
 
-  print "TRAINING NETWORK"
+  print("TRAINING NETWORK")
 
   with tf.Session(config=tf.ConfigProto(intra_op_parallelism_threads=8) ) as sess:
     sess.run(tf.global_variables_initializer())
@@ -283,7 +283,7 @@ def mainTF(options):
     #start queue runners
     dm.launchQueueThreads(sess)
 
-    print "Reporting validation loss every %i batches with %i events per batch for %i epochs"%(ReportInterval, MiniBatchSize, nEpoch)
+    print("Reporting validation loss every %i batches with %i events per batch for %i epochs"%(ReportInterval, MiniBatchSize, nEpoch))
 
     #preload the first data into staging area
     sess.run([mlp.stagingOp], feed_dict={mlp.reg: l2Reg, mlp.keep_prob:options.runOp.keepProb})
@@ -334,7 +334,7 @@ def mainTF(options):
       while dm.continueFlushingQueue():
         sess.run(dm.inputDataQueue.dequeue_many(MiniBatchSize))
 
-    except Exception, e:
+    except(Exception, e):
       # Report exceptions to the coordinator.
       dm.requestStop(e)
     finally:

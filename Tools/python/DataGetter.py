@@ -74,7 +74,7 @@ class DataGetter:
 
         for v in variables:
             if not v in columnHeaders:
-                print "Variable not found: %s"%v
+                print("Variable not found: %s"%v)
 
         dataColumns = np.array([np.flatnonzero(columnHeaders == v)[0] for v in variables])
 

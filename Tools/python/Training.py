@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
   cmdLineOptions, args = parser.parse_args()
 
-  if isinstance(cmdLineOptions.cfgFile, basestring): 
+  if isinstance(cmdLineOptions.cfgFile, str): 
     options = taggerOptions.loadJSON(cmdLineOptions.cfgFile)
   else:
     options = taggerOptions.defaults()
@@ -39,7 +39,9 @@ if __name__ == '__main__':
   elif cmdLineOptions.xgboost:
     mainXGB(cmdLineOptions)
   else:
+    print(type(options))
+    print(options)
     saveOptionsToJSON(options,options.runOp.directory+options.saveName)    
     mainTF(options)
 
-  print "TRAINING DONE!"
+  print("TRAINING DONE!")

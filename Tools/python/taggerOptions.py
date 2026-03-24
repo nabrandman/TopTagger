@@ -269,7 +269,7 @@ class runOptions:
       #Some temporary hacks, lets make these options      
       fileLists = [glob(self.dataPath + fileGlob)[:self.nTrainingFiles] for fileGlob in self.trainingGlob]
 
-      self.trainingSamples = zip(*fileLists)
+      self.trainingSamples = dict(zip(*fileLists))
 
    #This method uses the dataPath and the list of validationNames to make a list of validation files
    def makeValidationSamples(self):
@@ -285,7 +285,7 @@ class runOptions:
    def getParser(cls, parser):
 
       if not isinstance(parser, OptionParser):
-         print "Object passed to runOptions.getParser is not an OptionParser object"
+         print("Object passed to runOptions.getParser is not an OptionParser object")
          parser = OptionsParser()
 
       parser.add_option ('-p', "--ptReweight",        dest="ptReweight",        action='store',      type="int",   help="Reweight pt spectrum of events durring training")
@@ -383,7 +383,7 @@ class runOptions:
       rOptions = cls.defaults()
 
       if not isinstance(runDict, dict):
-         print "runOptions.makeFromDict requires a dict object"
+         print("runOptions.makeFromDict requires a dict object")
          return rOptions
 
       #This is the part that needs to be changed if the structure becomes more complicated
@@ -444,7 +444,7 @@ class networkOptions:
    def getParser(cls, parser):
 
       if not isinstance(parser, OptionParser):
-         print "Object passed to runOptions.getParser is not an OptionParser object"
+         print("Object passed to runOptions.getParser is not an OptionParser object")
          parser = OptionsParser()
 
       parser.add_option ('-v', "--variables", dest='variables', action='store', help="Input features to use (default TeamAlpha)")
@@ -468,10 +468,10 @@ class networkOptions:
             f = open(cloptions.modelJSON,"r")
             cfgs = json.load(f)
          except IOError:
-            print "Unable to open", cloptions.modelJSON
+            print("Unable to open", cloptions.modelJSON)
             loaded = false
          else:
-            print "Loading",cloptions.variables,"from",cloptions.modelJSON
+            print("Loading",cloptions.variables,"from",cloptions.modelJSON)
             self.vNames = cfgs[cloptions.variables] #the json file is a dictionary, cloptions.variables specifies the key to use
             returnMessage = "Loaded "+cloptions.variables+" from "+cloptions.modelJSON 
 
@@ -506,7 +506,7 @@ class networkOptions:
       nOptions = cls.defaults()
 
       if not isinstance(netDict, dict):
-         print "networkOptions.makeFromDict requires a dict object"
+         print("networkOptions.makeFromDict requires a dict object")
          return nOptions
 
       #This is the part that needs to be changed if the structure becomes more complicated
@@ -532,13 +532,13 @@ class taggerOptions:
    @classmethod
    def loadJSON(cls, fname = "taggerCfg.json"):
       if fname == "taggerCfg.json":
-         print "No configuration file has been specified, using default (taggerCfg.json)"
+         print("No configuration file has been specified, using default (taggerCfg.json)")
 
       try:
          f           = open(fname,"r")
          jsonOptions = json.load(f)
       except IOError:
-         print "Unable to open",fname,"default options will be used"
+         print("Unable to open",fname,"default options will be used")
          return cls.defaultMessage("Unable to load config from "+fname)
 
       rDict = jsonOptions['runOp']
@@ -587,7 +587,7 @@ class taggerOptions:
 
    def serialize(self):
       if not isinstance(self, taggerOptions):
-         print "Trying to convert non taggerOptions object with serializeTaggerOptions"
+         print("Trying to convert non taggerOptions object with serializeTaggerOptions")
          return
 
       self.cleanUp()
@@ -607,7 +607,7 @@ def getParser():
 
 def saveOptionsToJSON(options,fname):
    if not isinstance(options, taggerOptions):
-      print "Incorrect object passed. saveOptionsToJSON works on taggerOptions objects. Nothing will be saved."
+      print("Incorrect object passed. saveOptionsToJSON works on taggerOptions objects. Nothing will be saved.")
       return
 
    options.cleanUp()
@@ -616,13 +616,13 @@ def saveOptionsToJSON(options,fname):
       f = open(fname,"w")
       json.dump(options.serialize(), f, sort_keys=True, indent=4)
    except IOError:
-      print "Unable to save configuration to",fname
+      print("Unable to save configuration to",fname)
 
    return
 
 def override(options, cloptions):
    if not isinstance(options, taggerOptions):
-      print "override only accepts taggerOptions objects"
+      print("override only accepts taggerOptions objects")
    else:
       options.override(cloptions)
 
