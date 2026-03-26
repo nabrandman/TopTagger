@@ -13,7 +13,7 @@ class DataSample:
 
         self.inputDataQueue = inputDataQueue
 
-        self.queue = tf.FIFOQueue(capacity = 32768, shapes = inputDataQueue.shapes, dtypes = inputDataQueue.dtypes)
+        self.queue = tf.queue.FIFOQueue(capacity = 32768, shapes = inputDataQueue.shapes, dtypes = inputDataQueue.dtypes)
 
         #enqueue delay
         self.scaleFactor = self.dataSet.xsec*self.dataSet.rescale*self.dataSet.kFactor/self.dataSet.Nevts

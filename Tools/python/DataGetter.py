@@ -20,23 +20,23 @@ class DataGetter:
     def StandardVariables(cls, variables):
 
         if variables == "TeamAlpha":
-            vNames = ["cand_m", "j12_m", "j13_m", "j23_m", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_CSV", "j2_CSV", "j3_CSV"]
+            vNames = ["cand_m", "j12_m", "j13_m", "j23_m", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_btagUParTAK4B", "j2_btagUParTAK4B", "j3_btagUParTAK4B"]
         elif variables == "Mixed":
-            vNames = ["cand_m", "j12_m_lab", "j13_m_lab", "j23_m_lab", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_CSV_lab", "j2_CSV_lab", "j3_CSV_lab", "dRPtTop", "dRPtW", "sd_n2"]
+            vNames = ["cand_m", "j12_m_lab", "j13_m_lab", "j23_m_lab", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_btagUParTAK4B_lab", "j2_btagUParTAK4B_lab", "j3_btagUParTAK4B_lab", "dRPtTop", "dRPtW", "sd_n2"]
         elif variables == "TeamA":
-            vNames = ["j1_m_lab", "j1_CSV_lab", "j2_CSV_lab", "j3_CSV_lab", "cand_m", "dRPtTop", "j23_m_lab", "dRPtW", "j12_m_lab", "j13_m_lab", "sd_n2"]
+            vNames = ["j1_m_lab", "j1_btagUParTAK4B_lab", "j2_btagUParTAK4B_lab", "j3_btagUParTAK4B_lab", "cand_m", "dRPtTop", "j23_m_lab", "dRPtW", "j12_m_lab", "j13_m_lab", "sd_n2"]
         elif variables == "TeamAlphaMore":
-            vNames = ["cand_m", "j12_m", "j13_m", "j23_m", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_CSV", "j2_CSV", "j3_CSV"]
+            vNames = ["cand_m", "j12_m", "j13_m", "j23_m", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_btagUParTAK4B", "j2_btagUParTAK4B", "j3_btagUParTAK4B"]
         elif variables == "TeamAMore":
-            vNames = ["j1_m_lab", "j1_CSV_lab", "j2_CSV_lab", "j3_CSV_lab", "cand_m", "dRPtTop", "j23_m_lab", "dRPtW", "j12_m_lab", "j13_m_lab", "sd_n2"]
+            vNames = ["j1_m_lab", "j1_btagUParTAK4B_lab", "j2_btagUParTAK4B_lab", "j3_btagUParTAK4B_lab", "cand_m", "dRPtTop", "j23_m_lab", "dRPtW", "j12_m_lab", "j13_m_lab", "sd_n2"]
         elif variables == "MixedMoreCandPt":
-            vNames = ["cand_m", "cand_pt", "j12_m", "j13_m", "j23_m", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_CSV_lab", "j2_CSV_lab", "j3_CSV_lab", "dRPtTop", "dRPtW", "sd_n2"]
+            vNames = ["cand_m", "cand_pt", "j12_m", "j13_m", "j23_m", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_btagUParTAK4B_lab", "j2_btagUParTAK4B_lab", "j3_btagUParTAK4B_lab", "dRPtTop", "dRPtW", "sd_n2"]
         elif variables == "TeamAlphaMoreCandPt":
-            vNames = ["cand_m", "cand_pt", "j12_m", "j13_m", "j23_m", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_CSV", "j2_CSV", "j3_CSV"]
+            vNames = ["cand_m", "cand_pt", "j12_m", "j13_m", "j23_m", "j1_p", "j2_p", "j3_p", "dTheta12", "dTheta23", "dTheta13", "j1_btagUParTAK4B", "j2_btagUParTAK4B", "j3_btagUParTAK4B"]
         elif variables == "TeamAMoreCandPt":
-            vNames = ["cand_pt", "j1_m_lab", "j1_CSV_lab", "j2_CSV_lab", "j3_CSV_lab", "cand_m", "dRPtTop", "j23_m_lab", "dRPtW", "j12_m_lab", "j13_m_lab", "sd_n2"]
+            vNames = ["cand_pt", "j1_m_lab", "j1_btagUParTAK4B_lab", "j2_btagUParTAK4B_lab", "j3_btagUParTAK4B_lab", "cand_m", "dRPtTop", "j23_m_lab", "dRPtW", "j12_m_lab", "j13_m_lab", "sd_n2"]
         elif variables == "TeamAlpha1DConv":
-            vNames = ["cand_m", "cand_pt", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13", "j1_p", "j1_CSV", "j1_chargedHadEFrac","j1_chargedEmEFrac", "j1_neutralEmEFrac", "j1_muonEFrac", "j1_photonEFrac", "j1_elecEFrac", "j1_chargedHadMult", "j1_neutralHadMult", "j1_photonMult", "j1_elecMult", "j1_muonMult", "j1_jetCharge", "j2_p", "j2_CSV", "j2_chargedHadEFrac","j2_chargedEmEFrac", "j2_neutralEmEFrac", "j2_muonEFrac", "j2_photonEFrac", "j2_elecEFrac", "j2_chargedHadMult", "j2_neutralHadMult", "j2_photonMult", "j2_elecMult", "j2_muonMult", "j2_jetCharge", "j3_p", "j3_CSV", "j3_chargedHadEFrac","j3_chargedEmEFrac", "j3_neutralEmEFrac", "j3_muonEFrac", "j3_photonEFrac", "j3_elecEFrac", "j3_chargedHadMult", "j3_neutralHadMult", "j3_photonMult", "j3_elecMult", "j3_muonMult", "j3_jetCharge"];
+            vNames = ["cand_m", "cand_pt", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13", "j1_p", "j1_btagUParTAK4B", "j1_chargedHadEFrac","j1_chargedEmEFrac", "j1_neutralEmEFrac", "j1_muonEFrac", "j1_photonEFrac", "j1_elecEFrac", "j1_chargedHadMult", "j1_neutralHadMult", "j1_photonMult", "j1_elecMult", "j1_muonMult", "j1_jetCharge", "j2_p", "j2_btagUParTAK4B", "j2_chargedHadEFrac","j2_chargedEmEFrac", "j2_neutralEmEFrac", "j2_muonEFrac", "j2_photonEFrac", "j2_elecEFrac", "j2_chargedHadMult", "j2_neutralHadMult", "j2_photonMult", "j2_elecMult", "j2_muonMult", "j2_jetCharge", "j3_p", "j3_btagUParTAK4B", "j3_chargedHadEFrac","j3_chargedEmEFrac", "j3_neutralEmEFrac", "j3_muonEFrac", "j3_photonEFrac", "j3_elecEFrac", "j3_chargedHadMult", "j3_neutralHadMult", "j3_photonMult", "j3_elecMult", "j3_muonMult", "j3_jetCharge"];
 
         return cls(vNames)
 
@@ -73,19 +73,20 @@ class DataGetter:
         f.close()
 
         for v in variables:
-            if not v in columnHeaders:
+            #if not v in columnHeaders:
+            if not v.encode() in columnHeaders:
                 print("Variable not found: %s"%v)
 
-        dataColumns = np.array([np.flatnonzero(columnHeaders == v)[0] for v in variables])
+        dataColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in variables])
 
         ptColumnsName = ["cand_pt"]
-        ptColumns = np.array([np.flatnonzero(columnHeaders == v)[0] for v in ptColumnsName])
+        ptColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in ptColumnsName])
         
         labelColumnNames = ["genConstiuentMatchesVec", "genTopMatchesVec", "ncand"]
-        labelColumns = np.array([np.flatnonzero(columnHeaders == v)[0] for v in labelColumnNames])
+        labelColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in labelColumnNames])
         
         wgtColumnNames = ["sampleWgt"]
-        wgtColumns = np.array([np.flatnonzero(columnHeaders == v)[0] for v in wgtColumnNames])
+        wgtColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in wgtColumnNames])
         
         #load data files 
         dsets = [h5py.File(filename, mode='r')['reco_candidates'] for filename in samplesToRun]

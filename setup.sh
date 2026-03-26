@@ -1,5 +1,7 @@
 #! /bin/sh
 
+export PYTHONPATH=~/.local/lib/python3.8/site-packages:$PYTHONPATH
+export PYTHONPATH=$CMSSW_BASE/src/TopTagger:$PYTHONPATH
 CURRENT=$(pwd)
 TOP_DIR=$CMSSW_BASE/src/TopTagger
 SUSY_DIR=$CMSSW_BASE/src/SusyAnaTools

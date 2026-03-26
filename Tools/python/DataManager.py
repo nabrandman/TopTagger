@@ -2,7 +2,7 @@ import numpy
 import math
 import tensorflow as tf
 import threading
-import Queue
+import queue
 from time import sleep
 
 from DataSample import DataSample
@@ -13,8 +13,12 @@ class DataManager:
         self.nEpoch = nEpoch
 
         #Define input data queue
-        self.inputDataQueue = tf.RandomShuffleQueue(capacity=65536*2, min_after_dequeue=65536*2 - 65536/2, shapes=[[nFeatures], [nLabels], [nDomains], [nWeigts]], dtypes=[tf.float32, tf.float32, tf.float32, tf.float32])
+        #self.inputDataQueue = tf.RandomShuffleQueue(capacity=65536*2, min_after_dequeue=65536*2 - 65536/2, shapes=[[nFeatures], [nLabels], [nDomains], [nWeigts]], dtypes=[tf.float32, tf.float32, tf.float32, tf.float32])
+        #self.inputDataQueue = tf.data.Dataset.shuffle(capacity=65536*2, min_after_dequeue=65536*2 - 65536/2, shapes=[[nFeatures], [nLabels], [nDomains], [nWeigts]], dtypes=[tf.float32, tf.float32, tf.float32, tf.float32])
+        self.inputDataQueue = tf.compat.v1.RandomShuffleQueue(capacity=65536*2, min_after_dequeue=65536*2 - 65536/2, shapes=[[nFeatures], [nLabels], [nDomains], [nWeigts]], dtypes=[tf.float32, tf.float32, tf.float32, tf.float32])
 
+        print("randomshufflequeue.shape:", self.inputDataQueue.shapes)
+        print("randomshufflequeue.size:", self.inputDataQueue.size())
         #Add DataSample objects for each data set used 
         self.sigScaleSum = 0
         for dataSet in signalDataSets:
@@ -73,7 +77,7 @@ class DataManager:
         self.threadsS2 += dataThreads
 
         #create tf queue runner to manage the final random shuffle queue
-        self.qr = tf.train.QueueRunner(self.inputDataQueue, enqueueOps, queue_closed_exception_types=(tf.errors.OutOfRangeError, tf.errors.CancelledError))
+        self.qr = tf.compat.v1.train.QueueRunner(self.inputDataQueue, enqueueOps, queue_closed_exception_types=(tf.errors.OutOfRangeError, tf.errors.CancelledError))
 
         self.threadsS1 = self.qr.create_threads(sess, coord=self.coordS1, start=True)
 
@@ -81,13 +85,13 @@ class DataManager:
         try:
             return not self.coordS2.should_stop()
         except AttributeError:
-            print "Run launchQueueThreads before starting the training loop"
+            print("Run launchQueueThreads before starting the training loop")
 
     def continueFlushingQueue(self):
         try:
             return not self.coordS1.should_stop()
         except AttributeError:
-            print "Run launchQueueThreads before starting the training loop"        
+            print("Run launchQueueThreads before starting the training loop")
 
     def requestStop(self, e = None):
         try:
@@ -98,13 +102,13 @@ class DataManager:
                 self.coordS1.request_stop(e)
                 self.coordS2.request_stop(e)
         except AttributeError:
-            print "Run launchQueueThreads before starting the training loop"
+            print("Run launchQueueThreads before starting the training loop")
 
     def join(self):
         try:
             self.coordS1.join(self.threadsS1)
             self.coordS2.join(self.threadsS2)
         except AttributeError:
-            print "Run launchQueueThreads before starting the training loop"
+            print("Run launchQueueThreads before starting the training loop")
         
 

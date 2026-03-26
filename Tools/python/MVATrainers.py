@@ -23,12 +23,13 @@ def getValidData(dg, validDataFiles, options):
       minValidDataSize = validDataSize
   
   validData = {}
+
   for data in validDataArray:
     for key in data:
       if key in validData:
-        validData[key] = numpy.vstack([validData[key], data[key][:minValidDataSize*dataMultiplier]])
+        validData[key] = numpy.vstack([validData[key], data[key][:int(minValidDataSize*dataMultiplier)]])
       else:
-        validData[key] = data[key][:minValidDataSize*dataMultiplier]
+        validData[key] = data[key][:int(minValidDataSize*dataMultiplier)]
   
   perm = numpy.random.permutation(validData["data"].shape[0])
 
@@ -181,29 +182,35 @@ def mainTF(options):
   from DataSet import DataSet
 
   print("PROCESSING VALIDATION DATA")
+  tf.compat.v1.disable_eager_execution()
 
   dgSig = DataGetter.DefinedVariables(options.netOp.vNames, signal = True)
   dgBg = DataGetter.DefinedVariables(options.netOp.vNames, background = True)
 
-  validDataSig = [(("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6p1/trainingTuple_0_division_1_TTbarSingleLepT_validation_0.h5", ), 1),
-                  (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6p1/trainingTuple_0_division_1_TTbarSingleLepTbar_validation_0.h5", ), 1)]
+  #validDataSig = [(("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6p1/trainingTuple_0_division_1_TTbarSingleLepT_validation_0.h5", ), 1),
+  #                (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6p1/trainingTuple_0_division_1_TTbarSingleLepTbar_validation_0.h5", ), 1)]
+  validDataSig = [(("/uscms_data/d3/nbrandma/thesis/run2toptagger/3/mygits/CMSSW_11_3_4/src/TopTagger/Tools/Data/trainingTuple_test_division_1_TTToLNu2Q_sig_validation_0.h5", ), 1)]
 
-  validDataBgTTbar = [(("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_TTbarSingleLepT_validation_0.h5", ), 1),
-                      (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_TTbarSingleLepTbar_validation_0.h5", ), 1),]
-  
-  validDataBgQCDMC = [(("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT100to200_validation_0.h5", ), 1),
-                      (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT200to300_validation_0.h5", ), 1),
-                      (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT300to500_validation_0.h5", ), 1),
-                      (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT500to700_validation_0.h5", ), 1),
-                      (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT700to1000_validation_0.h5", ), 1),
-                      (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT1000to1500_validation_0.h5", ), 1),
-                      (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT1500to2000_validation_0.h5", ), 1),
-                      (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT2000toInf_validation_0.h5", ), 1)]
-  
-  validDataBgQCDData = [(("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_Data_JetHT_2016_validation_0.h5", ), 1)]
-  
+  validDataBgTTbar = [(("/uscms_data/d3/nbrandma/thesis/run2toptagger/3/mygits/CMSSW_11_3_4/src/TopTagger/Tools/Data/trainingTuple_test_division_1_TTToLNu2Q_bkg_validation_0.h5", ), 1)]
 
-  print("Input Variables: ",len(dgSig.getList()))
+  validDataBgQCDMC = [(("/uscms_data/d3/nbrandma/thesis/run2toptagger/3/mygits/CMSSW_11_3_4/src/TopTagger/Tools/Data/trainingTuple_test_division_1_TTToLNu2Q_bkg_validation_0.h5", ), 1)]
+
+  validDataBgQCDData = [(("/uscms_data/d3/nbrandma/thesis/run2toptagger/3/mygits/CMSSW_11_3_4/src/TopTagger/Tools/Data/trainingTuple_test_division_1_TTToLNu2Q_bkg_validation_0.h5", ), 1)]
+
+  #validDataBgTTbar = [(("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_TTbarSingleLepT_validation_0.h5", ), 1),
+  #                    (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_TTbarSingleLepTbar_validation_0.h5", ), 1),]
+  
+  #validDataBgQCDMC = [(("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT100to200_validation_0.h5", ), 1),
+  #                    (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT200to300_validation_0.h5", ), 1),
+  #                    (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT300to500_validation_0.h5", ), 1),
+  #                    (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT500to700_validation_0.h5", ), 1),
+  #                    (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT700to1000_validation_0.h5", ), 1),
+  #                    (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT1000to1500_validation_0.h5", ), 1),
+  #                    (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT1500to2000_validation_0.h5", ), 1),
+  #                    (("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_QCD_HT2000toInf_validation_0.h5", ), 1)]
+  
+  #validDataBgQCDData = [(("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_0_division_1_Data_JetHT_2016_validation_0.h5", ), 1)]
+  
 
   # Import data
   #print(options.runOp.validationSamples)
@@ -222,6 +229,7 @@ def mainTF(options):
   nFeatures = validDataTTbar["data"].shape[1]
   nLabels = validDataTTbar["labels"].shape[1]
   nWeights = validDataTTbar["weights"].shape[1]
+  print("nFeatures:", nFeatures, "nLabels:", nLabels, "nWeights:", nWeights)
 
   #Training parameters
   l2Reg = options.runOp.l2Reg
@@ -234,7 +242,7 @@ def mainTF(options):
   categories = numpy.array(options.netOp.vCategories)
   mins = numpy.zeros(categories.shape, dtype=numpy.float32)
   ptps = numpy.zeros(categories.shape, dtype=numpy.float32)
-  for i in xrange(categories.max()):
+  for i in range(categories.max()):
     selectedCategory = categories == i
     mins[selectedCategory] = validDataTTbar["data"][:,selectedCategory].mean()
     ptps[selectedCategory] = validDataTTbar["data"][:,selectedCategory].std()
@@ -242,15 +250,15 @@ def mainTF(options):
 
   ##Create data manager, this class controls how data is fed to the network for training
   #                 DataSet(fileGlob, xsec, Nevts, kFactor, sig, prescale, rescale)
-  signalDataSets = [DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6p1/trainingTuple_*_division_0_TTbarSingleLepT_training_*.h5",      365.4,  61878989, 1.0, True,  0, 1.0, 1.0, 8),
-                    DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6p1/trainingTuple_*_division_0_TTbarSingleLepTbar_training_*.h5",   365.4,  61901450, 1.0, True,  0, 1.0, 1.0, 8),]
-
+  #signalDataSets = [DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6p1/trainingTuple_*_division_0_TTbarSingleLepT_training_*.h5",      365.4,  61878989, 1.0, True,  0, 1.0, 1.0, 8),
+  #                  DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6p1/trainingTuple_*_division_0_TTbarSingleLepTbar_training_*.h5",   365.4,  61901450, 1.0, True,  0, 1.0, 1.0, 8),]
+  signalDataSets = [DataSet("/uscms_data/d3/nbrandma/thesis/run2toptagger/3/mygits/CMSSW_11_3_4/src/TopTagger/Tools/Data/trainingTuple_test_division_1_TTToLNu2Q_sig_training_0.h5",      365.4,  61878989, 1.0, True,  0, 1.0, 1.0, 8)]
   #pt reweighting histograms 
   ttbarRatio = (numpy.array([0.7976347,  1.010679,  1.0329635,  1.0712056,  1.1147588,  1.0072196,  0.79854023, 0.7216115,  0.7717652,  0.851551,   0.8372917 ]), numpy.array([  0.,  50., 100., 150., 200., 250., 300., 350., 400., 450., 500., 1e10]))
   QCDDataRatio = (numpy.array([0.50125164, 0.70985824, 1.007087,   1.6701245,  2.5925348,  3.6850858, 4.924969,   6.2674766,  7.5736594,  8.406105,   7.7529635 ]), numpy.array([  0.,  50., 100., 150., 200., 250., 300., 350., 400., 450., 500., 1e10]))
   QCDMCRatio = (numpy.array([0.75231355, 1.0563549,  1.2571484,  1.3007764,  1.0678109,  0.83444154, 0.641499,   0.49130705, 0.36807108, 0.24333349, 0.06963781]), numpy.array([  0.,  50., 100., 150., 200., 250., 300., 350., 400., 450., 500., 1e10]))
 
-  backgroundDataSets = [DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_*_division_0_TTbarSingleLepT_training_*.h5",    365.4,  61878989, 1.0, False, 0, 1.0, 1.0, 8,  ttbarRatio),
+  """backgroundDataSets = [DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_*_division_0_TTbarSingleLepT_training_*.h5",    365.4,  61878989, 1.0, False, 0, 1.0, 1.0, 8,  ttbarRatio),
                         DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_*_division_0_TTbarSingleLepTbar_training_*.h5", 365.4,  61901450, 1.0, False, 0, 1.0, 1.0, 8,  ttbarRatio),
                         DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_*_division_0_Data_JetHT_2016_training_*.h5",      1.0,         1, 1.0, False, 1, 1.0, 1.0, 8,  include = False),#QCDDataRatio),
                         DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_*_division_0_QCD_HT100to200_training_*.h5",   27990000,  80684349, 0.0, False, 2, 1.0, 1.0, 1, include = False),#QCDMCRatio), 
@@ -261,7 +269,8 @@ def mainTF(options):
                         DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_*_division_0_QCD_HT1000to1500_training_*.h5", 1207    ,  15127293, 0.0, False, 2, 1.0, 1.0, 1, include = False),#QCDMCRatio),
                         DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_*_division_0_QCD_HT1500to2000_training_*.h5", 119.9   ,  11826702, 0.0, False, 2, 1.0, 1.0, 1, include = False),#QCDMCRatio),
                         DataSet("/cms/data/pastika/trainData_pt20_30_40_dRPi_tightMass_deepFlavor_v6/trainingTuple_*_division_0_QCD_HT2000toInf_training_*.h5",  25.24   ,   6039005, 0.0, False, 2, 1.0, 1.0, 1, include = False),#QCDMCRatio),
-                        ]
+                        ]"""
+  backgroundDataSets = [DataSet("/uscms_data/d3/nbrandma/thesis/run2toptagger/3/mygits/CMSSW_11_3_4/src/TopTagger/Tools/Data/trainingTuple_test_division_1_TTToLNu2Q_bkg_training_0.h5", 365.4, 61878989, 1.0, False, 0, 1.0, 1.0, 8)]
 
   dm = DataManager(options.netOp.vNames, nEpoch, nFeatures, nLabels, 2, nWeights, options.runOp.ptReweight, signalDataSets, backgroundDataSets)
 
@@ -273,12 +282,12 @@ def mainTF(options):
   mlp = CreateModel(options, denseNetwork, convLayers, rnnNodes, rnnLayers, dm.inputDataQueue, MiniBatchSize, mins, 1.0/ptps)
 
   #summary writer
-  summary_writer = tf.summary.FileWriter(options.runOp.directory + "log_graph", graph=tf.get_default_graph())
+  summary_writer = tf.compat.v1.summary.FileWriter(options.runOp.directory + "log_graph", graph=tf.compat.v1.get_default_graph())
 
   print("TRAINING NETWORK")
 
-  with tf.Session(config=tf.ConfigProto(intra_op_parallelism_threads=8) ) as sess:
-    sess.run(tf.global_variables_initializer())
+  with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(intra_op_parallelism_threads=8) ) as sess:
+    sess.run(tf.compat.v1.global_variables_initializer())
 
     #start queue runners
     dm.launchQueueThreads(sess)

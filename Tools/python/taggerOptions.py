@@ -28,11 +28,11 @@ def splitVarAndCatagory(inVars):
 def StandardVariables(variables):
    if variables == "TeamAlpha":
       vNames = ["cand_m", "j12_m", "j13_m", "j23_m","dTheta12", "dTheta23", "dTheta13"]
-      jNames = ["p", "CSV"]
+      jNames = ["p", "btagUParTAK4B"]
 
    elif variables == "TeamAlphaNorm":
       vNames = [("cand_m", 1), ("j12_m", 1), ("j13_m", 1), ("j23_m", 1), ("dTheta12", 2), ("dTheta23", 2), ("dTheta13", 2)]
-      jNames = [("p", 1), "CSV"]
+      jNames = [("p", 1), "btagUParTAK4B"]
 
    elif variables == "Kinematic":
       vNames = ["cand_m", "j12_m", "j13_m", "j23_m","dTheta12", "dTheta23", "dTheta13"]
@@ -40,35 +40,35 @@ def StandardVariables(variables):
 
    elif variables == "Mixed":
       vNames = ["cand_m", "j12_m_lab", "j13_m_lab", "j23_m_lab", "dTheta12", "dTheta23", "dTheta13", "dRPtTop", "dRPtW", "sd_n2"]
-      jNames = ["p", "CSV_lab"]
+      jNames = ["p", "btagUParTAK4B_lab"]
 
    elif variables == "TeamA":
       vNames = ["cand_m", "dRPtTop", "j23_m_lab", "dRPtW", "j12_m_lab", "j13_m_lab", "sd_n2"]
-      jNames = ["m_lab", "CSV_lab"]
+      jNames = ["m_lab", "btagUParTAK4B_lab"]
  
    elif variables == "TeamAlphaMore":
       vNames = ["cand_m", "j12_m", "j13_m", "j23_m", "dTheta23"] 
-      jNames = ["m", "CSV"]
+      jNames = ["m", "btagUParTAK4B"]
 
    elif variables == "TeamAMore":
       vNames = ["cand_m", "dRPtTop", "j23_m", "dRPtW", "j12_m", "j13_m"]
-      jNames = ["m", "CSV"]
+      jNames = ["m", "btagUParTAK4B"]
 
    elif variables == "MixedMoreCandPt":
       vNames = ["cand_m", "j12_m", "j13_m", "j23_m", "dTheta23", "dRPtTop", "dRPtW"]
-      jNames = ["m", "CSV"]
+      jNames = ["m", "btagUParTAK4B"]
 
    elif variables == "Mixed2":
       vNames = ["cand_m", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13", "dRPtTop", "dRPtW"]
-      jNames = ["p", "m", "CSV"]
+      jNames = ["p", "m", "btagUParTAK4B"]
 
    elif variables == "Intermediate":
       vNames = ["cand_m", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13", "dRPtTop", "dRPtW"]
-      jNames = ["p", "m", "CSV", "CvsL", "CvsB"]
+      jNames = ["p", "m", "btagUParTAK4B", "CvsL", "CvsB"]
 
    elif variables == "Intermediate_less":
       vNames = ["cand_m", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13", "dRPtTop", "dRPtW"]
-      jNames = ["m", "CSV", "CvsL", "CvsB"]
+      jNames = ["m", "btagUParTAK4B", "CvsL", "CvsB"]
 
    elif variables == "MixedDeepCSV":
       vNames = ["cand_m", "cand_p", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13", "dRPtTop", "dRPtW", "sd_n2"]
@@ -80,11 +80,11 @@ def StandardVariables(variables):
 
    elif variables == "TeamAlphaMoreCandPt":
       vNames = ["cand_m", "cand_pt", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13"] 
-      jNames = ["p", "CSV"]
+      jNames = ["p", "btagUParTAK4B"]
 
    elif variables == "TeamAMoreCandPt":
       vNames = ["cand_pt", "cand_m", "dRPtTop", "j23_m_lab", "dRPtW", "j12_m_lab", "j13_m_lab", "sd_n2"]
-      jNames = ["m_lab", "CSV_lab"]
+      jNames = ["m_lab", "btagUParTAK4B_lab"]
 
    elif variables == "deepFlavor":
       vNames = ["cand_m", "cand_p", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13"]
@@ -398,7 +398,7 @@ class networkOptions:
 #and the type and structure of the network
    def __init__(self, networkName         = "Network test Configuration (name not set)",
                       inputVariables      = ["cand_m", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13"],
-                      jetVariables        = ["p", "CSV",],
+                      jetVariables        = ["p", "btagUParTAK4B",],
                       denseLayers         = [300],
                       denseActivationFunc = "relu",
                       convLayers          = [],

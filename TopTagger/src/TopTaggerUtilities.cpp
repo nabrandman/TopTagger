@@ -260,8 +260,7 @@ namespace ttUtility
         for(unsigned int i = 0; i < NCONST; ++i)
         {
             j_m_lab_[i] = -1;
-            j_CSV_lab_[i] = -1;
-            j_CvsL_lab_[i] = -1;
+            j_btagUParTAK4B_lab_[i] = -1;
             dR12_lab_[i] = -1;
             dR12_3_lab_[i] = -1;
             j12_m_lab_[i] = -1;
@@ -273,7 +272,7 @@ namespace ttUtility
             j_eta_lab_[i] = -1;
             j_pt_lab_[i] = -1;
             j_m_[i] = -1;
-            j_CSV_[i] = -1;
+            j_btagUParTAK4B_[i] = -1;
             j_recoJetsJecScaleRawToFull_[i] = -1;
             j_recoJetschargedHadronEnergyFraction_[i] = -1;
             j_recoJetschargedEmEnergyFraction_[i] = -1;
@@ -314,9 +313,9 @@ namespace ttUtility
 
         for(unsigned int j = 0; j < vars.size(); ++j)
         {
-	  if(vars[j].compare("cand_dThetaMin") == 0) {
+	  //if(vars[j].compare("cand_dThetaMin") == 0) {
 	    //std::cout << "cand_dThetaMin found in variables at: " << j << std::endl;
-	  };
+	  //};
             if(vars[j].compare("cand_pt") == 0) cand_pt_ = j;
             if(vars[j].compare("cand_p") == 0) cand_p_ = j;
             if(vars[j].compare("cand_eta") == 0) cand_eta_ = j;
@@ -336,8 +335,7 @@ namespace ttUtility
                 int iNNext = (i+2)%NCONST;
 
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_m_lab") == 0)                                  j_m_lab_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_CSV_lab") == 0)                                j_CSV_lab_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_CvsL_lab") == 0)                               j_CvsL_lab_[i] = j;
+                if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4B_lab") == 0)                      j_btagUParTAK4B_lab_[i] = j;
                 if(vars[j].compare("dR" + std::to_string(iMin + 1) + std::to_string(iMax + 1) + "_lab") == 0)     dR12_lab_[i] = j;
                 if(vars[j].compare("dR" + std::to_string(iNNext + 1) + "_" + std::to_string(iMin + 1) + std::to_string(iMax + 1) + "_lab") == 0) dR12_3_lab_[i] = j;
                 if(vars[j].compare("j"  + std::to_string(iMin + 1) + std::to_string(iMax + 1) + "_m_lab") == 0)   j12_m_lab_[i] = j;
@@ -349,7 +347,7 @@ namespace ttUtility
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_eta_lab") == 0)                                j_eta_lab_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_pt_lab") == 0)                                 j_pt_lab_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_m") == 0)                                      j_m_[i] = j;
-                if(vars[j].compare("j" + std::to_string(i + 1) + "_CSV") == 0)                                    j_CSV_[i] = j;
+                if(vars[j].compare("j" + std::to_string(i + 1) + "_btagUParTAK4B") == 0)                          j_btagUParTAK4B_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetsJecScaleRawToFull") == 0)              j_recoJetsJecScaleRawToFull_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetschargedHadronEnergyFraction") == 0)    j_recoJetschargedHadronEnergyFraction_[i] = j;
                 if(vars[j].compare("j" + std::to_string(i + 1) + "_recoJetschargedEmEnergyFraction") == 0)        j_recoJetschargedEmEnergyFraction_[i] = j;
@@ -424,11 +422,10 @@ namespace ttUtility
             for(unsigned int i = 0; i < top_constituents.size(); ++i)
             {
 	      //std::cout << "i: " << i << " in for(unsigned int i = 0; i < top_constituents.size(); ++i)" << std::endl;
-                if(j_m_lab_[i] >= 0)       *(basePtr_ + j_m_lab_[i] + len_*iCand)       = top_constituents[i]->p().M();
+                if(j_m_lab_[i] >= 0)              *(basePtr_ + j_m_lab_[i] + len_*iCand)             = top_constituents[i]->p().M();
 		//std::cout << "after if(j_m_lab_[i] >= 0" << std::endl;
-                if(j_CSV_lab_[i] >= 0)     *(basePtr_ + j_CSV_lab_[i] + len_*iCand)     = top_constituents[i]->getBTagDisc();
+                if(j_btagUParTAK4B_lab_[i] >= 0)  *(basePtr_ + j_btagUParTAK4B_lab_[i] + len_*iCand) = top_constituents[i]->getBTagDisc();
 		//std::cout << "after if(j_CSV_lab_[i] >= 0)" << std::endl;
-                if(j_CvsL_lab_[i] >= 0)     *(basePtr_ + j_CvsL_lab_[i] + len_*iCand)     = relu(top_constituents[i]->getExtraVar("CvsL"));
 		//std::cout << "after if(j_CvsL_lab_[i] >= 0)" << std::endl;
 
                 //index of next jet (assumes < 4 jets)
@@ -519,7 +516,7 @@ namespace ttUtility
             
                 if(j_m_[i] >= 0)   *(basePtr_ + j_m_[i] + len_*iCand)     = RF_constituents[i].p().M();
 		//std::cout << "j_m" << std::endl;
-                if(j_CSV_[i] >= 0) *(basePtr_ + j_CSV_[i] + len_*iCand)   = RF_constituents[i].getBTagDisc();
+                if(j_btagUParTAK4B_[i] >= 0) *(basePtr_ + j_btagUParTAK4B_[i] + len_*iCand)   = RF_constituents[i].getBTagDisc();
 		//std::cout << "j_CSV" << std::endl;
 
                 if(j_recoJetsJecScaleRawToFull_[i] >= 0)           *(basePtr_ + j_recoJetsJecScaleRawToFull_[i] + len_*iCand)           = relu(RF_constituents[i].getExtraVar("recoJetsJecScaleRawToFull"));
@@ -669,8 +666,8 @@ namespace ttUtility
                     "j1_JetBprob",
                     "j1_recoJetsBtag",
                     "j1_recoJetsCharge",
-                    "j1_CSV",
-                    "j1_CSV_lab",
+                    "j1_btagUParTAK4B",
+                    "j1_btagUParTAK4B_lab",
                     "j1_eta_lab",
                     "j1_m",
                     "j1_m_lab",
@@ -705,8 +702,8 @@ namespace ttUtility
                     "j2_JetBprob",
                     "j2_recoJetsBtag",
                     "j2_recoJetsCharge",
-                    "j2_CSV",
-                    "j2_CSV_lab",
+                    "j2_btagUParTAK4B",
+                    "j2_btagUParTAK4B_lab",
                     "j2_eta_lab",
                     "j2_m",
                     "j2_m_lab",
@@ -741,8 +738,8 @@ namespace ttUtility
                     "j3_JetBprob",
                     "j3_recoJetsBtag",
                     "j3_recoJetsCharge",
-                    "j3_CSV",
-                    "j3_CSV_lab",
+                    "j3_btagUParTAK4B",
+                    "j3_btagUParTAK4V_lab",
                     "j3_eta_lab",
                     "j3_m",
                     "j3_m_lab",

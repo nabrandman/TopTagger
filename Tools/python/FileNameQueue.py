@@ -2,7 +2,7 @@ import numpy
 import math
 import tensorflow as tf
 import threading
-import Queue
+import queue
 
 class FileNameQueue:
     #This class is designed to store and randomize a filelist for use by several CustomRunner objects
@@ -11,7 +11,7 @@ class FileNameQueue:
         self.nEpoch = nEpoch
 
         #filename queue
-        self.fileQueue = Queue.Queue(self.files.shape[0])
+        self.fileQueue = queue.Queue(self.files.shape[0])
 
     def getQueue(self):
         return self.fileQueue
@@ -20,7 +20,7 @@ class FileNameQueue:
         return self.fileQueue.get(False)
 
     def queueProcess(self, coord):
-        for i in xrange(self.nEpoch + 1):
+        for i in range(self.nEpoch + 1):
             if coord.should_stop():
                 break
             perms = numpy.random.permutation(self.files.shape[0])
@@ -33,7 +33,7 @@ class FileNameQueue:
                         break
                     try:
                         self.fileQueue.put(tuple((fileName,)), timeout=10 )
-                    except Queue.Full:
+                    except queue.Full:
                         continue
                     breakLoop = True
             if i == self.nEpoch:

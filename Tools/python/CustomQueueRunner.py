@@ -1,6 +1,6 @@
 import tensorflow as tf
 import threading
-import Queue
+import queue
 
 from DataGetter import DataGetter
 
@@ -20,10 +20,10 @@ class CustomQueueRunner(object):
         self.domain = domain
 
         # place holders to enqueue data with 
-        self.dataX = tf.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[0][0]])
-        self.dataY = tf.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[1][0]])
-        self.dataD = tf.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[2][0]])
-        self.dataW = tf.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[3][0]])
+        self.dataX = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[0][0]])
+        self.dataY = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[1][0]])
+        self.dataD = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[2][0]])
+        self.dataW = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[3][0]])
 
         #feature names to select
         self.variables = variables
@@ -44,7 +44,7 @@ class CustomQueueRunner(object):
         while True:
             try:
                 yield self.fileQueue.get()
-            except Queue.Empty:
+            except queue.Empty:
                 return
 
     def data_iterator(self):

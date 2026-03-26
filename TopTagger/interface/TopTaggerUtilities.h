@@ -583,8 +583,7 @@ namespace ttUtility
         int cand_dThetaMax_;
 
         int j_m_lab_[NCONST];
-        int j_CSV_lab_[NCONST];
-        int j_CvsL_lab_[NCONST];
+        int j_btagUParTAK4B_lab_[NCONST];
         int dR12_lab_[NCONST];
         int dR12_3_lab_[NCONST];
         int j12_m_lab_[NCONST];
@@ -601,7 +600,7 @@ namespace ttUtility
         int j_eta_lab_[NCONST];
         int j_pt_lab_[NCONST];
         int j_m_[NCONST];
-        int j_CSV_[NCONST];
+        int j_btagUParTAK4B_[NCONST];
         int j_recoJetsJecScaleRawToFull_[NCONST];
         int j_recoJetschargedHadronEnergyFraction_[NCONST];
         int j_recoJetschargedEmEnergyFraction_[NCONST];
