@@ -20,10 +20,10 @@ class CustomQueueRunner(object):
         self.domain = domain
 
         # place holders to enqueue data with 
-        self.dataX = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[0][0]])
-        self.dataY = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[1][0]])
-        self.dataD = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[2][0]])
-        self.dataW = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[3][0]])
+        #self.dataX = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[0][0]])
+        #self.dataY = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[1][0]])
+        #self.dataD = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[2][0]])
+        #self.dataW = tf.compat.v1.placeholder(dtype=tf.float32, shape=[None, self.queueX.shapes[3][0]])
 
         #feature names to select
         self.variables = variables
@@ -32,7 +32,7 @@ class CustomQueueRunner(object):
         self.batch_size = batchSize
 
         # The symbolic operation to add data to the queue
-        self.enqueue_opX = self.queueX.enqueue_many([self.dataX, self.dataY, self.dataD, self.dataW])
+        #self.enqueue_opX = self.queueX.enqueue_many([self.dataX, self.dataY, self.dataD, self.dataW])
 
         # additional options 
         self.ptReweight = ptReweight
@@ -41,6 +41,8 @@ class CustomQueueRunner(object):
 
     def fileName_iterator(self):
         #Simple iterator to get new filename from file queue
+        #print(self.fileQueue)
+        #print(self.fileQueue.get())
         while True:
             try:
                 yield self.fileQueue.get()
@@ -57,12 +59,22 @@ class CustomQueueRunner(object):
       dg = DataGetter(self.variables, signal=self.signal, background=self.background, domain=self.domain, bufferData = False, weightHist=self.weightHist, include=self.include)
             
       #loop until there are no more files to get from the queue
+      print('fIter:', fIter)
       for fileName in fIter:
         #read next file
         data = dg.importData(fileName, ptReweight=self.ptReweight)
         batch_idx = 0
         nSamples = data["data"].shape[0]
+        print('in data_iterator')
+        print('fileName:', fileName)
+        print('Data:', data)
+        print('Data[data]:', data['data'])
         while batch_idx + self.batch_size <= nSamples:
+            #print("\n\n\n")
+            #print('batch_idx:', batch_idx)
+            #print('self.batch_size:', self.batch_size)
+            #print('batch_idx+self.batch_size:', batch_idx+self.batch_size)
+            #print('\n\n\n)')
             yield data["data"][batch_idx:batch_idx+self.batch_size], data["labels"][batch_idx:batch_idx+self.batch_size], data["domain"][batch_idx:batch_idx+self.batch_size], data["weights"][batch_idx:batch_idx+self.batch_size]
             batch_idx += self.batch_size
 
@@ -76,22 +88,41 @@ class CustomQueueRunner(object):
       """
       Function run on alternate thread. Basically, keep adding data to the queue.
       """
+      #print('in thread_main')
+      #print('self.enqueue_opX:', self.enqueue_opX)
+      #print('self.dataX:', self.dataX)
+      #print('self.dataY:', self.dataY)
+      #print('self.dataD:', self.dataD)
+      #print('self.dataW:', self.dataW)
       for dataX, dataY, dataD, dataW in self.data_iterator():
+        #print('dataX:', dataX)
+        #print('dataY:', dataY)
+        #print('dataD:', dataD)
+        #print('dataW:', dataW)
         if coord.should_stop():
+          #print('if coord.should.stop():')
           break
-        sess.run([self.enqueue_opX], feed_dict={self.dataX:dataX, self.dataY:dataY, self.dataD:dataD, self.dataW:dataW})
+        #sess.run([self.enqueue_opX], feed_dict={self.dataX:dataX, self.dataY:dataY, self.dataD:dataD, self.dataW:dataW})
 
-      sess.run(self.queueX.close())
+      #print('self.enqueue_opX:', self.enqueue_opX)
+      #sess.run(self.queueX.close())
       coord.request_stop()
 
     def start_threads(self, sess, coord, n_threads):
       """ Start background threads to feed queue """
       threads = []
+      #print('in start_threads')
+      #print('n_threads:', n_threads)
       for n in range(n_threads):
+        #print('n:', n)
         t = threading.Thread(target=self.thread_main, args=(sess, coord, ))
+        #print('t1:', t)
         #p.daemon = True # thread will close when parent quits
         t.start()
+        #print('t2:', t)
         threads.append(t)
+        #print('threads:', threads)
+      #print()
 
       return threads
 

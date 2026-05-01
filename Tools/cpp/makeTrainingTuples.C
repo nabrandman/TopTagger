@@ -55,32 +55,21 @@ public:
 
     void initBranches(const NTupleReader& tr)
     {
-      //std::cout << "in initBranches" << std::endl;
         for(const auto& dataset : variables_)
         {
-	  //std::cout << "in for(const auto& dataset : variables_)" << std::endl;
             auto& ptrPair = pointers_[dataset.first];
-	    //std::cout << "after auto& ptrPair = pointers_[dataset.first];" << std::endl;
             ptrPair.clear();
-	    //std::cout << "after ptrPair.clear();" << std::endl;
             for(const auto& var : dataset.second)
             {
-	      //std::cout << "in for(const auto& var : dataset.second)" << std::endl;
                 std::string type;
                 tr.getType(var, type);
-		//std::cout << "after tr.getType(var, type);" << std::endl;
-		//std::cout << "var: " << var << " | type: " << type << std::endl;
                 if(type.find("vector") != std::string::npos)
                 {
-		  //std::cout << "in if(type.find(\"vector\") != std::string::npos)" << std::endl;
                     ptrPair.push_back(std::make_pair(true, tr.getVecPtr(var)));
-		    //std::cout << "after ptrPair.push_back(std::make_pair(true, tr.getVecPtr(var)));" << std::endl;
                 }
                 else
                 {
-		  //std::cout << "in else" << std::endl;
                     ptrPair.push_back(std::make_pair(false, tr.getPtr(var)));
-		    //std::cout << "after ptrPair.push_back(std::make_pair(false, tr.getPtr(var)));" << std::endl;
                 }
             }
         }
@@ -230,86 +219,48 @@ private:
     TopTagger* topTagger_;
     TopCat topMatcher_;
     int eventNum_, bgPrescale_;
+    int realEventNum_;
     const std::map<std::string, std::vector<std::string>>& variables_;
-  //std::cout << "before mvaCalc_;" << std::endl;
-  std::shared_ptr<ttUtility::MVAInputCalculator> mvaCalc_;
+    std::shared_ptr<ttUtility::MVAInputCalculator> mvaCalc_;
 
-  //  std::shared_ptr<ttUtility::TrijetInputCalculator> mvaCalc_;
-  //std::cout << "after mvaCalc_;"
     std::vector<float> values_;
     bool signal_;
     int Nbu_, Ncu_, Nlu_, Ngu_;
     int Nbl_, Ncl_, Nll_, Ngl_;
-
+  
+    int nFile_;
     bool prepVariables(NTupleReader& tr)
     {
-      //std::cout << "in prepVariables(tr)" << std::endl;
         const std::vector<TLorentzVector>& jetsLVec  = tr.getVec_LVFromNano<float>("Jet");
         const std::vector<float>& btagUParTAK4B      = tr.getVec<float>("Jet_btagUParTAK4B");
-
+	bool passMVABaseline = true;
         //New Tagger starts here
         //prep input object (constituent) vector
         ttUtility::ConstAK4Inputs<float> myConstAK4Inputs = ttUtility::ConstAK4Inputs<float>(jetsLVec, btagUParTAK4B);
 
+	int realEventNum;
+	realEventNum = nFile_*500000;
+	realEventNum = realEventNum + realEventNum_;
+	realEventNum_++;
         auto convertToDoubleandRegister = [](NTupleReader& tr, std::string name)
         {
 
 	  std::string type;
 	  std::vector<float>* doubleVec;
 	  tr.getType(name, type);
-	  //std::cout << "\nconvertToDoubleandRegister:" << std::endl;
-	  //std::cout << "Name: " << name << "  |  Type: " << type << std::endl;
 	  if (type.find("float") != std::string::npos) {
-	    //std::cout << "\tin float:" << std::endl;
 	    const std::vector<float>& inVec = tr.getVec<float>(name);
-	    //for (int i = 0; i < 10; i++) {
-	    //  std::cout << inVec[i] << " | ";
-	    //};
-	    //std::cout << std::endl;
 	    doubleVec = new std::vector<float>(inVec.begin(), inVec.end());
-	    //for (int i = 0; i < 10; i++) {
-	    //  std::cout << doubleVec[0][i] << " | ";
-	    //};
-	    //std::cout << std::endl;
 	  } else {
 	    if (type.find("short") != std::string::npos) {
 	      const std::vector<short>& inVec = tr.getVec<short>(name);
 	      doubleVec = new std::vector<float>(inVec.begin(), inVec.end());
-	      //std::cout << "\tin short:" << std::endl;
-	      //for (int i = 0; i < 10; i++) {
-	      //  std::cout << inVec[i] << " | ";
-	      //};
-	      //std::cout << std::endl;
-	      //for (int i = 0; i < 10; i++) {
-	      //  std::cout << doubleVec[0][i] << " | ";
-	      //};
-	      //std::cout << std::endl;
-
 	    } else if (type.find("unsigned char") != std::string::npos) {
 	      const std::vector<unsigned char>& inVec = tr.getVec<unsigned char>(name);
 	      doubleVec = new std::vector<float>(inVec.begin(), inVec.end());
-	      //std::cout << "\tin unsigned char:" << std::endl;
-	      //for (int i = 0; i < 10; i++) {
-	      //std::cout << inVec[i] << " | ";
-	      //};
-	      //std::cout << std::endl;
-	      //for (int i = 0; i < 10; i++) {
-	      //std::cout << doubleVec[0][i] << " | ";
-	      //};
-	      //std::cout << std::endl;
 	    } else {
 	      const std::vector<int>& inVec = tr.getVec<int>(name);
 	      doubleVec = new std::vector<float>(inVec.begin(), inVec.end());
-	      //std::cout << "\tin else:" << std::endl;
-	      //for (int i = 0; i < 10; i++) {
-	      //std::cout << inVec[i] << " | ";
-	      //};
-	      //std::cout << std::endl;
-	      //for (int i = 0; i < 10; i++) {
-	      //std::cout << doubleVec[0][i] << " | ";
-	      //};
-	      //std::cout << std::endl;
-
 	    };
 	    tr.registerDerivedVec(name+"ConvertedToDouble", doubleVec);
 	  };
@@ -318,6 +269,7 @@ private:
 
         typedef std::pair<std::vector<TLorentzVector>, std::vector<std::vector<const TLorentzVector*>>> GenInfoType;
         std::unique_ptr<GenInfoType> genTopInfo(nullptr);
+	const int& nJet = tr.getVar<int>("nJet");
         if(tr.checkBranch("GenPart_statusFlags"))
         {
             const std::vector<TLorentzVector>& genDecayLVec = tr.getVec_LVFromNano<float>("GenPart");
@@ -335,6 +287,70 @@ private:
         }
         else
         {
+	    const std::vector<float>& jet_pt = tr.getVec<float>("Jet_pt");
+
+	    const std::vector<float>& el_pt = tr.getVec<float>("Electron_pt");
+	    const std::vector<float>& el_eta = tr.getVec<float>("Electron_eta");
+	    const std::vector<unsigned char>& el_cutBased = tr.getVec<unsigned char>("Electron_cutBased");
+	    const std::vector<float>& el_miniIso = tr.getVec<float>("Electron_miniPFRelIso_all");
+	    const int& nElectron = tr.getVar<int>("nElectron");
+
+	    const std::vector<float>& mu_pt = tr.getVec<float>("Muon_pt");
+	    const std::vector<float>& mu_eta = tr.getVec<float>("Muon_eta");
+	    const std::vector<float>& mu_miniIso = tr.getVec<float>("Muon_miniPFRelIso_all");
+	    const std::vector<unsigned char>& mu_looseId = tr.getVec<unsigned char>("Muon_looseId");
+	    const int& nMuon = tr.getVar<int>("nMuon");
+
+	    float Ht = 0;
+	    int nPassingJets = 0;
+	    int nPassingElectrons = 0;
+	    int nPassingMuons = 0;
+
+	    for (int i = 0; i < nJet; i++) {
+	      Ht += jet_pt[i];
+	      if (jet_pt[i] > 40) nPassingJets++;
+	    };
+	    
+	    for (int i = 0; i < nElectron; i++) {
+	      bool mask = false;
+	      mask = (
+		      (el_pt[i] > 5)
+		      && (std::abs(el_eta[i]) < 1.4442)
+		      && (static_cast<int>(el_cutBased[i]) >= 1)
+		      && (el_miniIso[i] < 0.1)
+	        ) || (
+		      (el_pt[i] > 5)
+		      && (std::abs(el_eta[i]) > 1.5660)
+		      && (std::abs(el_eta[i]) < 2.5)
+		      && (static_cast<int>(el_cutBased[i]) >= 1)
+		      && (el_miniIso[i] < 0.1)
+	        );
+	      if (mask) {
+		nPassingElectrons++;
+		break;
+	      };
+	    };
+
+	    for (int i = 0; i < nMuon; i++) {
+	      bool mask = false;
+	      mask = (
+		      (mu_pt[i] > 5)
+		      && (std::abs(mu_eta[i]) < 2.4)
+		      && (static_cast<bool>(mu_looseId[i]))
+		      && (mu_miniIso[i] < 0.2)
+		      );
+	      if (mask) {
+		nPassingMuons++;
+		break;
+	      };
+	    };
+
+	    if ( (nPassingJets >= 4) && (Ht > 1000) && (nPassingElectrons == 0) && (nPassingMuons == 0) ) {
+	      passMVABaseline = true;
+	    } else {
+	      passMVABaseline = false;
+	    };
+
             myConstAK4Inputs.addSupplamentalVector("partonFlavor",                          tr.createDerivedVec<float>("thisIsATempVec", jetsLVec.size()));
         }
 
@@ -345,7 +361,6 @@ private:
         myConstAK4Inputs.addSupplamentalVector("recoJetsHFHadronEnergyFraction",        *convertToDoubleandRegister(tr, "Jet_hfHEF"));
         myConstAK4Inputs.addSupplamentalVector("recoJetsHFEMEnergyFraction",            *convertToDoubleandRegister(tr, "Jet_hfEmEF"));
         myConstAK4Inputs.addSupplamentalVector("recoJetsneutralEnergyFraction",         *convertToDoubleandRegister(tr, "Jet_neHEF"));
-        //myConstAK4Inputs.addSupplamentalVector("ChargedMultiplicity",                   tr.getVec<float>("Jet_chMultiplicity"));
 	myConstAK4Inputs.addSupplamentalVector("ChargedMultiplicity",                   *convertToDoubleandRegister(tr, "Jet_chMultiplicity"));
         myConstAK4Inputs.addSupplamentalVector("NeutralMultiplicity",                   *convertToDoubleandRegister(tr, "Jet_neMultiplicity"));
         myConstAK4Inputs.addSupplamentalVector("ElectronMultiplicity",                  *convertToDoubleandRegister(tr, "Jet_nElectrons"));
@@ -355,11 +370,11 @@ private:
 	myConstAK4Inputs.addSupplamentalVector("btagUParTAK4CvL",                       *convertToDoubleandRegister(tr, "Jet_btagUParTAK4CvL"));
 	myConstAK4Inputs.addSupplamentalVector("btagUParTAK4CvNotB",                    *convertToDoubleandRegister(tr, "Jet_btagUParTAK4CvNotB"));
 	myConstAK4Inputs.addSupplamentalVector("btagUParTAK4QvG",                       *convertToDoubleandRegister(tr, "Jet_btagUParTAK4QvG"));
-	myConstAK4Inputs.addSupplamentalVector("btagUParTAK4SvCB",                      *convertToDoubleandRegister(tr, "Jet_btagUParTAK4SvCB"));
-	myConstAK4Inputs.addSupplamentalVector("btagUParTAK4SvUDG",                     *convertToDoubleandRegister(tr, "Jet_btagUParTAK4SvUDG"));
-	myConstAK4Inputs.addSupplamentalVector("btagUParTAK4UDG",                       *convertToDoubleandRegister(tr, "Jet_btagUParTAK4UDG"));
-	myConstAK4Inputs.addSupplamentalVector("btagUParTAK4probb",                     *convertToDoubleandRegister(tr, "Jet_btagUParTAK4probb"));
-	myConstAK4Inputs.addSupplamentalVector("btagUParTAK4probbb",                    *convertToDoubleandRegister(tr, "Jet_btagUParTAK4probbb"));
+	//myConstAK4Inputs.addSupplamentalVector("btagUParTAK4SvCB",                      *convertToDoubleandRegister(tr, "Jet_btagUParTAK4SvCB"));
+	//myConstAK4Inputs.addSupplamentalVector("btagUParTAK4SvUDG",                     *convertToDoubleandRegister(tr, "Jet_btagUParTAK4SvUDG"));
+	//myConstAK4Inputs.addSupplamentalVector("btagUParTAK4UDG",                       *convertToDoubleandRegister(tr, "Jet_btagUParTAK4UDG"));
+	//myConstAK4Inputs.addSupplamentalVector("btagUParTAK4probb",                     *convertToDoubleandRegister(tr, "Jet_btagUParTAK4probb"));
+	//myConstAK4Inputs.addSupplamentalVector("btagUParTAK4probbb",                    *convertToDoubleandRegister(tr, "Jet_btagUParTAK4probbb"));
 
 
         std::vector<Constituent> constituents = ttUtility::packageConstituents(myConstAK4Inputs);
@@ -389,7 +404,7 @@ private:
         {
             for(auto& genTop : genTopInfo->first) 
             {
-                vh.add("candNumGen", icandGen++);
+                vh.add("candNumGen", ++icandGen);
                 vh.add("genTopPt", genTop.Pt());
             }
         }
@@ -402,14 +417,9 @@ private:
         std::vector<float>* candNum = new std::vector<float>();
         int iTop = 0;
         //prepare reco top quantities
-	//std::cout << "before for(const TopObject& topCand : topCands)" << std::endl;
-	//int topcand_counter = 0;
 	bool is_signal = false;
         for(const TopObject& topCand : topCands)
         {
-	  //std::cout << "in for(const TopObject& topCand : topCands)" << std::endl;
-	  //++topcand_counter;
-	  //std::cout << "topcand_counter: " << topcand_counter << std::endl;
             const auto* bestMatch = topCand.getBestGenTopMatch(0.6, 3, 3);
             bool hasBestMatch = bestMatch !=  nullptr;
             float bestMatchPt = bestMatch?(bestMatch->Pt()):(-999.9);
@@ -419,16 +429,12 @@ private:
             int NConstMatches = 0;
             for(const auto* constituent : topConstituents)
             {
-	      //std::cout << "in for(const auto* constituent : topConstituents)" << std::endl;
-	      //std::cout << "NConstMatches: " << NConstMatches << std::endl;
                 auto iter = constituent->getGenMatches().find(bestMatch);
                 if(iter != constituent->getGenMatches().end())
                 {
                     ++NConstMatches;
                 }
             }
-	    //std::cout << "after for(const auto* constituent : topConstituents)" << std::endl;
-	    //std::cout << "NConstMatches: " << NConstMatches << std::endl;
 
             //parton category
             int j1_parton = abs(static_cast<int>(topConstituents[0]->getExtraVar("partonFlavor")));
@@ -440,17 +446,6 @@ private:
             int Ng = (j1_parton == 21) + (j2_parton == 21) + (j3_parton == 21);
             int Nl = (j1_parton < 4) + (j2_parton < 4) + (j3_parton < 4);
 
-	    //std::cout << "signal_: " << signal_ << " | (hasBestMatch && NConstMatches == 3 ): " << (hasBestMatch && NConstMatches == 3);
-	    //std::cout << " | !(hasBestMatch && NConstMatches == 3): " << !(hasBestMatch && NConstMatches == 3) << std::endl;
-	    //std::cout << "Nbu_: " << Nbu_ << " | Nb: " << Nb << std::endl;
-	    //std::cout << "Ncu_: " << Ncu_ << " | Nc: " << Nc << std::endl;
-	    //std::cout << "Nlu_: " << Nlu_ << " | Nl: " << Nl << std::endl;
-	    //std::cout << "Ngu_: " << Ngu_ << " | Ng: " << Ng << std::endl;
-	    //std::cout << "Nbl_: " << Nbl_ << " | Nb: " << Nb << std::endl;
-	    //std::cout << "Ncl_: " << Ncl_ << " | Nc: " << Nc << std::endl;
-	    //std::cout << "Nll_: " << Nll_ << " | Nl: " << Nl << std::endl;
-	    //std::cout << "Ngl_: " << Ngl_ << " | Ng: " << Ng << std::endl;
-            //if((hasBestMatch && NConstMatches == 3) || bgPrescale_++ == 0)
             if( ((signal_)?( hasBestMatch && NConstMatches == 3 ):( !(hasBestMatch && NConstMatches == 3) ) )
                 && (Nbu_ < 0 || Nb <= Nbu_)
                 && (Ncu_ < 0 || Nc <= Ncu_)
@@ -462,48 +457,30 @@ private:
                 && (Ngl_ < 0 || Ng >= Ngl_)
                 )
             {
-	      is_signal = true;
-	      //std::cout << "in big if statement" << std::endl;
-	      //tr.registerDerivedVar("is_signal", true);
-	      //passMVABaseline = true;
+   	        is_signal = true;
                 const auto& varNames = variables_.find("reco_candidates")->second;
-                candNum->push_back(static_cast<float>(iTop++));
+                candNum->push_back(static_cast<float>(++iTop));
                 genMatchConst->push_back(NConstMatches);
                 genMatchdR->push_back(hasBestMatch);
                 genMatchVec->push_back(bestMatchPt);
 
                 mvaCalc_->setPtr(values_.data());
-		//std::cout << "after mvaCalc_->setPtr(vales_.data());" << std::endl;
                 if(mvaCalc_->calculateVars(topCand, 0))
                 {
-		  //std::cout << "in if(mvaCalc_->calculateVars(topCand, 0))" << std::endl;
                     for(int i = 0; i < varNames.size(); ++i)
                     {
-		      //std::cout << "var: " << varNames[i] << " | value: " << values_[i] << " | " << std::numeric_limits<std::remove_reference<decltype(values_.front())>::type>::max() << std::endl;
-		      //std::cout << "in for(int i = 0; i < varNames.size(); ++i)" << std::endl;
                         if(values_[i] < std::numeric_limits<std::remove_reference<decltype(values_.front())>::type>::max()) vh.add(varNames[i], values_[i]);
-			//std::cout << "after if(values_[i] ...)" << std::endl;
                     }
-		    //std::cout << "after for(int i = 0; i < varNames.size(); ++i)" << std::endl;
                 }
-		//std::cout << "after if(mvaCalc_->calculateVars(topCand, 0))" << std::endl;
             } else {
 	      is_signal = false || is_signal; 
 	    };
-	    //tr.registerDerivedVar("is_signal", false);
-	    //tr.registerDerivedVar("passMVABaseline", false);
-	    //return true;
-	    //};
-	    //std::cout << "after if ( signal_ ...)" << std::endl;
             if(bgPrescale_ >= 1) bgPrescale_ = 0;
-	    //std::cout << "after if(bgPrescale_ >=1) bgPrescale_ = 0;" << std::endl;
         }
-	//std::cout << "after for(const TopObject& topCand : topCands)" << std::endl;
 
 	tr.registerDerivedVar("is_signal", is_signal);
-	if (is_signal) {
+	if (is_signal && passMVABaseline) {
 	  vh.registerFunctions();
-	  std::cout << "after vh.registerFunctions();" << std::endl;
 	  
 	  //register matching vectors
 	  tr.registerDerivedVec("genTopMatchesVec",        genMatchdR);
@@ -513,14 +490,17 @@ private:
 	  tr.registerDerivedVar("nConstituents", static_cast<int>(constituents.size()));
 	  
 	  tr.registerDerivedVar("eventNum", static_cast<float>(eventNum_++));
+	  tr.registerDerivedVar("eventNum2", static_cast<float>(realEventNum));
+	  tr.registerDerivedVar("Njet", static_cast<float>(nJet));//tr.getVar<int>("nJet"));
+	  tr.registerDerivedVar("MET", tr.getVar<float>("PuppiMET_pt"));
 	  tr.registerDerivedVec("candNum", candNum);
 	  tr.registerDerivedVar("ncand", static_cast<float>(candNum->size()));
 	  
 	  //Generate basic MVA selection 
-	  bool passMVABaseline = true;//met > 100 && cntNJetsPt30 >= 5 && cntCSVS >= 1 && cntCSVL >= 2;//true;//(topCands.size() >= 1) || genMatches.second.second->size() >= 1;
+;
 	  tr.registerDerivedVar("passMVABaseline", passMVABaseline);
 	} else {
-	  bool passMVABaseline = false;
+	  passMVABaseline = false;
 	  tr.registerDerivedVar("passMVABaseline", passMVABaseline);
 	};
 	
@@ -528,9 +508,10 @@ private:
     }
 
 public:
-    PrepVariables(const std::map<std::string, std::vector<std::string>>& variables, bool signal, int Nbl, int Ncl, int Nll, int Ngl, int Nbu, int Ncu, int Nlu, int Ngu) : variables_(variables), values_(variables.find("reco_candidates")->second.size(), std::numeric_limits<std::remove_reference<decltype(values_.front())>::type>::max()), signal_(signal), Nbu_(Nbu), Ncu_(Ncu), Nlu_(Nlu), Ngu_(Ngu), Nbl_(Nbl), Ncl_(Ncl), Nll_(Nll), Ngl_(Ngl)
+  PrepVariables(const std::map<std::string, std::vector<std::string>>& variables, bool signal, int Nbl, int Ncl, int Nll, int Ngl, int Nbu, int Ncu, int Nlu, int Ngu, int nFile) : variables_(variables), values_(variables.find("reco_candidates")->second.size(), std::numeric_limits<std::remove_reference<decltype(values_.front())>::type>::max()), signal_(signal), Nbu_(Nbu), Ncu_(Ncu), Nlu_(Nlu), Ngu_(Ngu), Nbl_(Nbl), Ncl_(Ncl), Nll_(Nll), Ngl_(Ngl), nFile_(nFile)
     {
         eventNum_ = 0;
+	realEventNum_ = 0;
         bgPrescale_ = 0;
 
         topTagger_ = new TopTagger();
@@ -542,7 +523,6 @@ public:
 
     bool operator()(NTupleReader& tr)
     {
-      //std::cout << "in bool operator()(NTupleReader& tr)" << std::endl;
         return prepVariables(tr);
     }
 };
@@ -662,8 +642,8 @@ int main(int argc, char* argv[])
         sampleloc = "condor";
     }
 
-    AnaSamples::SampleSet        ss("sampleSets_PostProcessed_2016.cfg", runOnCondor);
-    AnaSamples::SampleCollection sc("sampleCollections_2016.cfg", ss);
+    AnaSamples::SampleSet        ss("sampleSets.cfg", false);
+    AnaSamples::SampleCollection sc("sampleCollections.cfg", ss);
 
     map<string, vector<AnaSamples::FileSummary>> fileMap;
 
@@ -682,10 +662,6 @@ int main(int argc, char* argv[])
         if(ss[dataSets] != ss.null())
         {
             fileMap[dataSets] = {ss[dataSets]};
-            //for(const auto& colls : ss[dataSets].getCollections())
-            //{
-            //    fileMap[colls] = {ss[dataSets]};
-            //}
         }
         else if(sc[dataSets] != sc.null())
         {
@@ -695,9 +671,12 @@ int main(int argc, char* argv[])
 
     const std::map<std::string, std::vector<std::string>> variables =
     {
-        {"gen_tops", {"eventNum", "candNumGen", "genTopPt", "sampleWgt"} },
+        {"gen_tops", {"eventNum", "eventNum2", "candNumGen", "genTopPt", "sampleWgt"} },
         {"reco_candidates", {"eventNum",
+			     "eventNum2",
                              "candNum",
+			     "Njet",
+			     "MET",
                              "ncand",
 
 			     "cand_p",
@@ -708,7 +687,6 @@ int main(int argc, char* argv[])
                              "cand_m",
                              "cand_phi",
                              "cand_pt",
-                             //"cand_p",
 
                              "dTheta12",
                              "dTheta13",
@@ -724,11 +702,11 @@ int main(int argc, char* argv[])
 			     "j1_btagUParTAK4CvL",
 			     "j1_btagUParTAK4CvNotB",
 			     "j1_btagUParTAK4QvG",
-			     "j1_btagUParTAK4SvCB",
-			     "j1_btagUParTAK4SvUDG",
-			     "j1_btagUParTAK4UDG",
-			     "j1_btagUParTAK4probb",
-			     "j1_btagUParTAK4probbb",
+			     //"j1_btagUParTAK4SvCB",
+			     //"j1_btagUParTAK4SvUDG",
+			     //"j1_btagUParTAK4UDG",
+			     //"j1_btagUParTAK4probb",
+			     //"j1_btagUParTAK4probbb",
                              "j1_ElectronMultiplicity",
                              "j1_MuonMultiplicity",
                              "j1_NeutralMultiplicity",
@@ -751,11 +729,11 @@ int main(int argc, char* argv[])
 			     "j2_btagUParTAK4CvL",
 			     "j2_btagUParTAK4CvNotB",
 			     "j2_btagUParTAK4QvG",
-			     "j2_btagUParTAK4SvCB",
-			     "j2_btagUParTAK4SvUDG",
-			     "j2_btagUParTAK4UDG",
-			     "j2_btagUParTAK4probb",
-			     "j2_btagUParTAK4probbb",
+			     //"j2_btagUParTAK4SvCB",
+			     //"j2_btagUParTAK4SvUDG",
+			     //"j2_btagUParTAK4UDG",
+			     //"j2_btagUParTAK4probb",
+			     //"j2_btagUParTAK4probbb",
                              "j2_ElectronMultiplicity",
                              "j2_MuonMultiplicity",
                              "j2_NeutralMultiplicity",
@@ -777,11 +755,11 @@ int main(int argc, char* argv[])
 			     "j3_btagUParTAK4CvL",
 			     "j3_btagUParTAK4CvNotB",
 			     "j3_btagUParTAK4QvG",
-			     "j3_btagUParTAK4SvCB",
-			     "j3_btagUParTAK4SvUDG",
-			     "j3_btagUParTAK4UDG",
-			     "j3_btagUParTAK4probb",
-			     "j3_btagUParTAK4probbb",
+			     //"j3_btagUParTAK4SvCB",
+			     //"j3_btagUParTAK4SvUDG",
+			     //"j3_btagUParTAK4UDG",
+			     //"j3_btagUParTAK4probb",
+			     //"j3_btagUParTAK4probbb",
                              "j3_ElectronMultiplicity",
                              "j3_MuonMultiplicity",
                              "j3_NeutralMultiplicity",
@@ -811,12 +789,14 @@ int main(int argc, char* argv[])
     {
         int splitNum = stoi(sampleRatios.substr((pos)?(pos + 1):(0)));
         sumRatio += splitNum;
-        string ofname;
-        if(iter == 0)      ofname = outFile + "_" + label + "_division_" + to_string(iter) + "_" + dataSets + is_signal + "_training" + ".root";
-        else if(iter == 1) ofname = outFile + "_" + label + "_division_" + to_string(iter) + "_" + dataSets + is_signal + "_validation" + ".root";
-        else if(iter == 2) ofname = outFile + "_" + label + "_division_" + to_string(iter) + "_" + dataSets + is_signal + "_test" + ".root";
-        else               ofname = outFile + "_" + label + "_division_" + to_string(iter) + "_" + dataSets + is_signal + ".root";
-        mtmVec.emplace_back(std::unique_ptr<HDF5Writer>(new HDF5Writer(variables, 500000, ofname)), splitNum);
+	if (splitNum != 0) {
+	    string ofname;
+	    if(iter == 0)      ofname = outFile + "_" + label + "_division_" + to_string(iter) + "_" + dataSets + is_signal + "_training" + ".root";
+	    else if(iter == 1) ofname = outFile + "_" + label + "_division_" + to_string(iter) + "_" + dataSets + is_signal + "_validation" + ".root";
+	    else if(iter == 2) ofname = outFile + "_" + label + "_division_" + to_string(iter) + "_" + dataSets + is_signal + "_test" + ".root";
+	    else               ofname = outFile + "_" + label + "_division_" + to_string(iter) + "_" + dataSets + is_signal + ".root";
+	    mtmVec.emplace_back(std::unique_ptr<HDF5Writer>(new HDF5Writer(variables, 500000, ofname)), splitNum);
+	  };
     }
 
     for(auto& fileVec : fileMap)
@@ -835,7 +815,6 @@ int main(int argc, char* argv[])
 
                 if(nFiles > 0) NEvtsTotal = 0;
                 else if(nEvts >= 0 && NEvtsTotal > nEvts) break;
-
                 //open input file and tree
                 TFile *f = TFile::Open(fname.c_str());
 
@@ -855,123 +834,90 @@ int main(int argc, char* argv[])
 		
                 try
                 {
-		  std::cout << "in try" << std::endl;
                     //Don't bother with activateBranches, take advantage of new on-the-fly branch allocation
                     NTupleReader tr(t);
-		    std::cout << "after NTupleReader initialization" << std::endl;
 
                     //register variable prep class with NTupleReader
-                    PrepVariables prepVars(variables, signal, Nbl, Ncl, Nll, Ngl, Nbu, Ncu, Nlu, Ngu);
-		    std::cout << "after PrepVariables" << std::endl;
+                    PrepVariables prepVars(variables, signal, Nbl, Ncl, Nll, Ngl, Nbu, Ncu, Nlu, Ngu, startCount);
                     tr.registerFunction(prepVars);
-		    std::cout << "after registerFunction" << std::endl;
 
                     int splitCounter = 0, mtmIndex = 0;
 
                     bool branchesInitialized = false;
 
-		    std::cout << "before while" << std::endl;
                     while(tr.getNextEvent())
                     {
-		      std::cout << "\n\nin while" << std::endl;
                         //Get sample lumi weight and correct for the actual number of events 
                         //This needs to happen before we ad sampleWgt to the mini tuple variables to save
                         float weight = file.getWeight();
-			std::cout << "after float weight = file.getWeight();" << std::endl;
                         tr.registerDerivedVar("sampleWgt", weight);
-			std::cout << "after tr.registerDerivedVar(\"sampleWgt\", weight);" << std::endl;
 
                         //If nEvts is set, stop after so many events
                         if(nEvts > 0 && NEvtsTotal > nEvts) break;
-			std::cout << "after if(nEvts > 0 && NEvtsTotal > nEvts) break;" << std::endl;
                         if(tr.getEvtNum() % printInterval == 0) std::cout << "Event #: " << tr.getEvtNum() << std::endl;
-			std::cout << "after if(tr.getEvtNum() % printInterval == 0)" << std::endl;
 
 			const bool& pass_signal = tr.getVar<bool>("is_signal");
 			bool other_pass_signal = pass_signal;
-			std::cout << "!branchesInitialized: " << !branchesInitialized << " | pass_signal: " << pass_signal << " | other_pass_signal: " << other_pass_signal << std::endl;
                         //Things to run only on first event
                         if((!branchesInitialized) && (other_pass_signal))
                         {
-			  std::cout << "\nin if(!branchesInitialized)" << std::endl;
                             try
                             {
-			      std::cout << "in try" << std::endl;
                                 //Initialize the mini tuple branches, needs to be done after first call of tr.getNextEvent()
                                 for(auto& mtm : mtmVec)
                                 {
-				  std::cout << "in for(auto& mtm : mtmVec)" << std::endl;
                                     mtm.first->initBranches(tr);
-				    std::cout << "after mtm.first->initBranches(tr);" << std::endl;
                                 }
                                 branchesInitialized = true;
-				std::cout << "after branchesInitialized = True;" << std::endl;
                             }
                             catch(const SATException& e)
                             {
-			      std::cout << "##############################################in catch(const SATException& e)" << std::endl;
                                 //do nothing here - this is sort of hacky
                                 continue;
                             }
                         }
-			std::cout << "after try/catch" << std::endl;
                         //Get cut variable 
                         const bool& passMVABaseline = tr.getVar<bool>("passMVABaseline");
 
 			//fill mini tuple
 			bool passbaseline = passMVABaseline;
-			// if(passMVABaseline)
-			std::cout << "passbaseline: " << passbaseline << std::endl;
 			if(passbaseline && other_pass_signal)
                         {
-			  std::cout << "in if(passbaseline)" << std::endl;
-                            mtmVec[mtmIndex].first->fill();
-			    std::cout << "after mtmVec[mtmIndex].first->fill();" << std::endl;
+			    mtmVec[mtmIndex].first->fill();
                             ++splitCounter;
                             if(splitCounter == mtmVec[mtmIndex].second)
                             {
-			      std::cout << "in if(splitCounter == mtmVec[mtmIndex].second)" << std::endl;
                                 splitCounter = 0;
                                 mtmIndex = (mtmIndex + 1)%mtmVec.size();
                             }
-			    std::cout << "after if(splitCounter == mtmVec[mtmIndex].second)" << std::endl;
                             ++NEvtsTotal;
                         }
-			std::cout << "after if(passbaseline)" << std::endl;
 
                     }
-		    std::cout << "after while(tr->getNextevent())" << std::endl;
-
                     f->Close();
+		    std::cout << "\n" << NEvtsTotal << " Events taken from file #" << startCount << std::endl;
                 }
                 catch(const SATException& e)
                 {
-		  std::cout << "in catch(const SATException& e)" << std::endl;
                     cout << e << endl;
                     throw;
                 }
                 catch(const TTException& e)
                 {
-		  std::cout << "in catch(const TTException& e)" << std::endl;
                     cout << e << endl;
                     throw;
                 }
                 catch(const string& e)
                 {
-		  std::cout << "in catch(const string& e)" << std::endl;
                     cout << e << endl;
                     throw;
                 }
+
             }
-	    std::cout << "after for(fname)" << std::endl;
         }
-	std::cout << "after for(file)" << std::endl;
     }
-    std::cout << "after for(filevec)" << std::endl;
 
     for(auto& mtm : mtmVec) {
-      std::cout << "in for(auto& mtm : mtmVec)" << std::endl;
       mtm.first.reset();
     };
-    std::cout << "after for(auto& mtm : mtmVec)" << std::endl;
 }

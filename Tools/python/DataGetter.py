@@ -51,85 +51,172 @@ class DataGetter:
     def prescaleBackground(self, input, answer, prescale):
       return np.vstack([input[answer == 1], input[answer != 1][::prescale]])
     
-    def importData(self, samplesToRun, prescale = True, ptReweight=True, randomize = True):
+    def importData(self, samplesToRun, prescale = True, ptReweight=True, randomize = True, for_metrics = False):
 
-      #check if this file was cached 
-      if (samplesToRun, prescale, ptReweight) in self.dataMap:
-        npyInputData, npyInputAnswers, npyInputWgts, npyInputSampleWgts = self.dataMap[samplesToRun, prescale, ptReweight]
+        #check if this file was cached 
+        if (samplesToRun, prescale, ptReweight) in self.dataMap:
+          npyInputData, npyInputAnswers, npyInputWgts, npyInputSampleWgts = self.dataMap[samplesToRun, prescale, ptReweight]
 
-      else:
-        #variables to train
-        vars = self.getList()
-        
-        inputData = np.empty([0])
-        npyInputWgts = np.empty([0])
-        
-        import h5py
-
-        variables = vars
-
-        f = h5py.File(samplesToRun[0], "r")
-        columnHeaders = f["reco_candidates"].attrs["column_headers"]
-        f.close()
-
-        for v in variables:
-            #if not v in columnHeaders:
-            if not v.encode() in columnHeaders:
-                print("Variable not found: %s"%v)
-
-        dataColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in variables])
-
-        ptColumnsName = ["cand_pt"]
-        ptColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in ptColumnsName])
-        
-        labelColumnNames = ["genConstiuentMatchesVec", "genTopMatchesVec", "ncand"]
-        labelColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in labelColumnNames])
-        
-        wgtColumnNames = ["sampleWgt"]
-        wgtColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in wgtColumnNames])
-        
-        #load data files 
-        dsets = [h5py.File(filename, mode='r')['reco_candidates'] for filename in samplesToRun]
-        
-        arrays = [da.from_array(dset, chunks=(65536, 1024)) for dset in dsets]
-        
-        x = da.concatenate(arrays, axis=0)
-        
-        data = x[:,dataColumns]
-        
-        #remove partial tops 
-        inputLabels = x[:,labelColumns]
-        inputAnswer = (inputLabels[:,0] > 2.99) & (inputLabels[:,1] > 0.99)
-    
-        inputBackground = (inputLabels[:,0] == 0) & da.logical_not(inputLabels[:,1])
-    
-        filterArray = []
-        if self.signal and self.background:
-            filterArray = ((inputAnswer == 1) | (inputBackground == 1)) & (inputLabels[:,2] > 0)
-        elif self.signal:
-            filterArray = (inputAnswer == 1) & (inputLabels[:,2] > 0)
-        elif self.background:
-            filterArray = (inputBackground == 1) & (inputLabels[:,2] > 0)
-
-        npyInputData = data[filterArray].compute()
-        #npyInputLabels = inputData.as_matrix(["genConstiuentMatchesVec", "genTopMatchesVec"])
-        npyInputAnswer = inputAnswer
-        if self.include:
-            npyInputAnswers = da.vstack([npyInputAnswer,da.logical_not(npyInputAnswer)]).transpose()[filterArray].compute()
         else:
-            npyInputAnswers = np.zeros((npyInputData.shape[0], 2))
-        npyInputSampleWgts = x[:,wgtColumns][filterArray].compute()
-        dataPt = x[:,ptColumns][filterArray].compute()
-        npyInputWgts = np.ones(len(npyInputSampleWgts)).reshape([-1,1])
+            #variables to train
+            vars = self.getList()
+        
+            inputData = np.empty([0])
+            npyInputWgts = np.empty([0])
+            
+            import h5py
 
-        if self.weightHist != None:
-            ptBins = self.weightHist[1]
-            ptWeightHist = self.weightHist[0]
-            npyInputWgts *= ptWeightHist[np.digitize(dataPt, ptBins) - 1].reshape([-1,1])
+            variables = vars
 
-        d = np.zeros((npyInputData.shape[0], 2))
-        if self.domain != None and self.domain > 0:
-            d[:,self.domain - 1] = 1
+            if type(samplesToRun) != type(('tuple_test',)):
+                samplesToRun_ = (samplesToRun,)
+            else:
+                samplesToRun_ = samplesToRun
+            f = h5py.File(samplesToRun_[0], "r")
+            columnHeaders = f["reco_candidates"].attrs["column_headers"]
+            genColumnHeaders = f['gen_tops'].attrs["column_headers"]
+            f.close()
 
-        return {"data":npyInputData, "labels":npyInputAnswers, "domain":d, "weights":npyInputWgts, "":npyInputSampleWgts}
+            for v in variables:
+                #if not v in columnHeaders:
+                if not v.encode() in columnHeaders:
+                    print("Variable not found: %s"%v)
 
+            dataColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in variables])
+
+            eventnumColumnsName = ['eventNum2']
+            eventNumColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in eventnumColumnsName])
+            geneventNumColumns = np.array([np.flatnonzero(genColumnHeaders == v.encode())[0] for v in eventnumColumnsName])
+            
+            ptColumnsName = ["cand_pt"]
+            ptColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in ptColumnsName])
+
+            labelColumnNames = ["genConstiuentMatchesVec", "genTopMatchesVec", "ncand"]
+            labelColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in labelColumnNames])
+
+            constituentMatchesNames = ['genConstiuentMatchesVec']
+            constituentMatchesColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in constituentMatchesNames])
+
+            topMatchesNames = ['genTopMatchesVec']
+            topMatchesColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in topMatchesNames])
+
+            constMatchGenPtVecNames = ['genConstMatchGenPtVec']
+            constMatchGenPtVecColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in constMatchGenPtVecNames])
+        
+            wgtColumnNames = ["sampleWgt"]
+            wgtColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in wgtColumnNames])
+        
+            nJetColumnNames = ['Njet']
+            nJetColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in nJetColumnNames])
+
+            metColumnNames = ['MET']
+            metColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in metColumnNames])
+
+            ncandColumnNames = ['ncand']
+            ncandColumns = np.array([np.flatnonzero(columnHeaders == v.encode())[0] for v in ncandColumnNames])
+
+            genPtColumnNames = ['genTopPt']
+            genPtColumns = np.array([np.flatnonzero(genColumnHeaders == v.encode())[0] for v in genPtColumnNames])
+
+            genwgtColumnNames = ['sampleWgt']
+            genwgtColumns = np.array([np.flatnonzero(genColumnHeaders == v.encode())[0] for v in genwgtColumnNames])
+
+            #load data files 
+            dsets = [h5py.File(filename, mode='r')['reco_candidates'] for filename in samplesToRun_]
+        
+            arrays = [da.from_array(dset, chunks=(65536, 1024)) for dset in dsets]
+        
+            x = da.concatenate(arrays, axis=0)
+        
+            data = x[:,dataColumns]
+
+            #remove partial tops 
+            inputLabels = x[:,labelColumns]
+            inputAnswer = (inputLabels[:,0] > 2.99) & (inputLabels[:,1] > 0.99)
+    
+            inputBackground = (inputLabels[:,0] == 0) & da.logical_not(inputLabels[:,1])
+    
+            filterArray = []
+            if self.signal and self.background:
+                filterArray = ((inputAnswer == 1) | (inputBackground == 1)) & (inputLabels[:,2] > 0)
+            elif self.signal:
+                filterArray = (inputAnswer == 1) & (inputLabels[:,2] > 0)
+            elif self.background:
+                filterArray = (inputBackground == 1) & (inputLabels[:,2] > 0)
+
+            npyInputData = data[filterArray].compute()
+            #npyInputLabels = inputData.as_matrix(["genConstiuentMatchesVec", "genTopMatchesVec"])
+            npyInputAnswer = inputAnswer
+            if self.include:
+                npyInputAnswers = da.vstack([npyInputAnswer,da.logical_not(npyInputAnswer)]).transpose()[filterArray].compute()
+            else:
+                npyInputAnswers = np.zeros((npyInputData.shape[0], 2))
+            npyInputSampleWgts = x[:,wgtColumns][filterArray].compute()
+            dataPt = x[:,ptColumns][filterArray].compute()
+            npyInputWgts = np.ones(len(npyInputSampleWgts)).reshape([-1,1])
+
+            if self.weightHist != None:
+                ptBins = self.weightHist[1]
+                ptWeightHist = self.weightHist[0]
+                npyInputWgts *= ptWeightHist[np.digitize(dataPt, ptBins) - 1].reshape([-1,1])
+
+            d = np.zeros((npyInputData.shape[0], 2))
+            if self.domain != None and self.domain > 0:
+                d[:,self.domain - 1] = 1
+
+            if for_metrics:
+                gen_dsets = [h5py.File(filename, mode='r')['gen_tops'] for filename in samplesToRun_]
+
+                gen_arrays = [da.from_array(gen_dset, chunks=(65536, 1024)) for gen_dset in gen_dsets]
+
+                gen_x = da.concatenate(gen_arrays, axis=0)
+
+                eventNum = x[:,eventNumColumns][filterArray].compute()
+                genEventNum = gen_x[:,geneventNumColumns].compute()
+                #genEventNum = np.concatenate((genEventNum, np.array([[np.nan]])))
+
+                #new_gen_indices = [0]
+                #gen_i = 0
+                #index_to_append = 0
+                #for data_i in range(1, len(eventNum)):
+                #    if eventNum[data_i] != eventNum[data_i-1]:
+                #        gen_i += 1
+                #        index_to_append = gen_i
+                #    if eventNum[data_i] not in genEventNum:
+                #        gen_i -= 1
+                #        index_to_append = -1
+                #    new_gen_indices.append(index_to_append)
+                new_gen_indices = []
+                dataNjet = x[:,nJetColumns][filterArray].compute()
+                for gen_i in range(0, len(genEventNum)):
+                    mask = eventNum == genEventNum[gen_i]
+                    if np.sum(dataNjet[mask] >= 4) > 0:
+                        new_gen_indices.append(gen_i)
+
+                length_fixer = np.full((len(eventNum)-len(new_gen_indices), 1), np.nan)
+                dataMET = x[:,metColumns][filterArray].compute()
+                dataConstituentMatches = x[:,constituentMatchesColumns][filterArray].compute()
+                dataTopMatches = x[:,topMatchesColumns][filterArray].compute()
+                dataConstMatchGenPtVec = x[:,constMatchGenPtVecColumns][filterArray].compute()
+                dataNCand = x[:,ncandColumns][filterArray].compute()
+                #genInputSampleWgts = np.concatenate((gen_x[:,genwgtColumns].compute(), np.array([[np.nan]])))[new_gen_indices]
+                #genPt = np.concatenate((gen_x[:,genPtColumns].compute(), np.array([[np.nan]])))[new_gen_indices]
+                genInputSampleWgts = np.concatenate((gen_x[:,genwgtColumns].compute()[new_gen_indices], length_fixer))
+                genPt = np.concatenate((gen_x[:,genPtColumns].compute()[new_gen_indices], length_fixer))
+                return {"data":npyInputData,
+                        "domain":d,
+                        "weights":npyInputWgts,
+                        "labels":npyInputAnswers,
+                        "sampleWeight":npyInputSampleWgts,
+                        'cand_pt':dataPt,
+                        'Njet':dataNjet,
+                        'MET':dataMET,
+                        'ncand':dataNCand,
+                        'genConstituentMatchesVec':dataConstituentMatches,
+                        'genTopMatchesVec':dataTopMatches,
+                        'genConstMatchGenPtVec':dataConstMatchGenPtVec,
+                        'genTopPt':genPt,
+                        'gensampleWeight':genInputSampleWgts}
+
+            else:
+                return {"data":npyInputData, "domain":d, "weights":npyInputWgts, "labels":npyInputAnswers, "sampleWeight":npyInputSampleWgts}

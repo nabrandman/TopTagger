@@ -66,6 +66,7 @@ echo "cd $CMSSW_BASE/src/TopTagger/TopTagger/test"
 cd $CMSSW_BASE/src/TopTagger/TopTagger/test
 echo "./configure"
 ./configure
+#TENSORFLOWDIR=/cvmfs/cms.cern.ch/slc7_amd64_gcc900/external/tensorflow/2.5.0
 echo ""
 echo "make clean"
 make clean
@@ -105,3 +106,4 @@ cd $CURRENT
 pwd
 
 
+#source /cvmfs/sft.cern.ch/lcg/releases/LCG_101cuda/tensorflow/2.5.0/x86_64-centos7-gcc8-opt/tensorflow-env.sh

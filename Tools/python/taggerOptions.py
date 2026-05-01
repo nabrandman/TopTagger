@@ -387,7 +387,7 @@ class runOptions:
          return rOptions
 
       #This is the part that needs to be changed if the structure becomes more complicated
-      for key, value in runDict.iteritems():
+      for key, value in runDict.items():
           setattr(rOptions, key, value)
 
       return rOptions
@@ -398,7 +398,10 @@ class networkOptions:
 #and the type and structure of the network
    def __init__(self, networkName         = "Network test Configuration (name not set)",
                       inputVariables      = ["cand_m", "j12_m", "j13_m", "j23_m", "dTheta12", "dTheta23", "dTheta13"],
-                      jetVariables        = ["p", "btagUParTAK4B",],
+                      jetVariables        = ["p", "m", "ElectronMultiplicity", "MuonMultiplicity", "ChargedMultiplicity",
+                                             "NeutralMultiplicity", "TotalMultiplicity", "recoJetsHFEMEnergyFraction", "recoJetsHFHadronEnergyFraction", "recoJetschargedEmEnergyFraction",
+                                             "recoJetschargedHadronEnergyFraction", "recoJetsmuonEnergyFraction", "recoJetsneutralEmEnergyFraction", "recoJetsneutralEnergyFraction",
+                                             "btagUParTAK4B", "btagUParTAK4CvB", "btagUParTAK4CvL", "btagUParTAK4CvNotB", "btagUParTAK4QvG"],
                       denseLayers         = [300],
                       denseActivationFunc = "relu",
                       convLayers          = [],
@@ -510,7 +513,7 @@ class networkOptions:
          return nOptions
 
       #This is the part that needs to be changed if the structure becomes more complicated
-      for key, value in netDict.iteritems():
+      for key, value in netDict.items():
           setattr(nOptions, key, value)
 
       return nOptions
@@ -542,6 +545,7 @@ class taggerOptions:
          return cls.defaultMessage("Unable to load config from "+fname)
 
       rDict = jsonOptions['runOp']
+      print(rDict)
       runOpJSON = runOptions.makeFromDict(rDict)
 
       nDict = jsonOptions['netOp']
