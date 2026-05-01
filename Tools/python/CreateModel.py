@@ -32,13 +32,15 @@ class LossLayer(tf.keras.layers.Layer):
         cross_entropy = loss_fn(
             y_true=y_true,
             y_pred=y_pred,
-            sample_weight=tf.reduce_sum(tf.cast(y_true, dtype=tf.float32), axis=1, keepdims=True)*wgt,
+            #sample_weight=tf.reduce_sum(tf.cast(y_true, dtype=tf.float32), axis=1, keepdims=True)*wgt,
+            sample_weight=tf.reduce_sum(y_true, axis=1, keepdims=True)*wgt,
         )
 
         cross_entropy_d = loss_fn(
             y_true=p_true,
             y_pred=p_pred,
-            sample_weight=tf.reduce_sum(tf.cast(p_true, dtype=tf.float32), axis=1, keepdims=True)*wgt,
+            #sample_weight=tf.reduce_sum(tf.cast(p_true, dtype=tf.float32), axis=1, keepdims=True)*wgt,
+            sample_weight=tf.reduce_sum(p_true, axis=1, keepdims=True)*wgt,
         )
 
         l2_norm = tf.constant(0.0)
@@ -75,7 +77,7 @@ class CreateModel:
     def get_layers(self):
         return self.custom_layers_dict
 
-    def createDenseNetwork(self, denseInputLayer, nnStruct, w_fc = {}, b_fc = {}, keep_prob=1.0, gradientReversalWeight=1.0, training = False, domainAdaptionConnectionLayer = 9999, NDomains = 2, prefix=""):
+    def createDenseNetwork(self, denseInputLayer, nnStruct, w_fc, b_fc, keep_prob=1.0, gradientReversalWeight=1.0, training = False, domainAdaptionConnectionLayer = 9999, NDomains = 2, prefix=""):
         #constants 
         NLayer = len(nnStruct)
         share = len(prefix) > 0
@@ -106,7 +108,8 @@ class CreateModel:
             new_batch_normalizer = tf.keras.layers.BatchNormalization(trainable=(not share), name="layer%i_bn"%layer)
             batchNormalizedLayer = new_batch_normalizer(addResult[layer - 1], training=training)
             if self.options.netOp.denseActivationFunc == "none":
-                layerOutput = batchNormalizedLayer
+                layerOutput = tf.keras.layers.Dense(batchNormalizedLayer.shape[1], activation='relu', use_bias=False, kernel_initializer=tf.keras.initializers.Identity(), name="h_fc%i%s"%(layer,prefix))(batchNormalizedLayer)
+                #layerOutput = batchNormalizedLayer
             else:
                 layerOutput = tf.keras.layers.Dense(batchNormalizedLayer.shape[1], activation=self.options.netOp.denseActivationFunc, use_bias=False, kernel_initializer=tf.keras.initializers.Identity(), name="h_fc%i%s"%(layer,prefix))(batchNormalizedLayer)
             #add dropout 
@@ -142,7 +145,8 @@ class CreateModel:
         NLayer = len(self.nnStruct)
     
         if len(self.nnStruct) < 2:
-            throw
+            #throw
+            raise
         
         #Define inputs and training inputs
         self.x = tf.keras.Input(shape=(self.nnStruct[0],), name="x")
@@ -172,5 +176,6 @@ class CreateModel:
         self.createMLP()
         self.model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=1.0e-4),
+            loss=None,
             )
         return self.model

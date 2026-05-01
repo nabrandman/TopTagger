@@ -151,6 +151,7 @@ class DataGetter:
                 npyInputAnswers = da.vstack([npyInputAnswer,da.logical_not(npyInputAnswer)]).transpose()[filterArray].compute()
             else:
                 npyInputAnswers = np.zeros((npyInputData.shape[0], 2))
+            npyInputAnswers = npyInputAnswers.astype('float32')
             npyInputSampleWgts = x[:,wgtColumns][filterArray].compute()
             dataPt = x[:,ptColumns][filterArray].compute()
             npyInputWgts = np.ones(len(npyInputSampleWgts)).reshape([-1,1])

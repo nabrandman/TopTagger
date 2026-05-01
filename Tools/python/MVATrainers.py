@@ -224,7 +224,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -236,7 +236,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -248,7 +248,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )"""
@@ -269,7 +269,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -281,7 +281,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -293,7 +293,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -305,7 +305,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -317,7 +317,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -329,7 +329,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -341,7 +341,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -353,7 +353,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -365,7 +365,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -377,7 +377,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -389,7 +389,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -401,7 +401,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -413,7 +413,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -425,7 +425,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -437,7 +437,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -449,7 +449,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -461,7 +461,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
@@ -497,7 +497,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )"""
@@ -508,7 +508,7 @@ def mainTF(options, label, from_checkpoint):
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
         'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.bool),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
