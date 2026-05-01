@@ -1,7 +1,7 @@
 import os
 import errno
 import optparse
-from MVATrainers import mainSKL, mainXGB, mainTF
+from MVATrainers import mainTF
 from taggerOptions import *
 
 if __name__ == '__main__':
@@ -9,9 +9,8 @@ if __name__ == '__main__':
   #Option parsing 
   parser = getParser() 
 
-  #We add the following options in order to run things other than tensorflow
-  parser.add_option ('-k', "--sklearnrf", dest='sklearnrf', action='store_true', help="Use skl random forest instead of tensorflow")
-  parser.add_option ('-x', "--xgboost", dest='xgboost', action='store_true', help="Run using xgboost")
+  parser.add_option ('-C', "--checkpoint", dest='from_checkpoint', help='Checkpoint number from which to resume training', default='0')
+  parser.add_option ('-L', "--label", dest='label', help='The name of the hdf5 dataset', default='')
 
   cmdLineOptions, args = parser.parse_args()
 
@@ -33,15 +32,7 @@ if __name__ == '__main__':
       else:
         raise
 
-  #run the approperaite main function 
-  if cmdLineOptions.sklearnrf:
-    mainSKL(cmdLineOptions)
-  elif cmdLineOptions.xgboost:
-    mainXGB(cmdLineOptions)
-  else:
-    print(type(options))
-    print(options)
-    saveOptionsToJSON(options,options.runOp.directory+options.saveName)    
-    mainTF(options)
+  saveOptionsToJSON(options,options.runOp.directory+options.saveName)    
+  mainTF(options, cmdLineOptions.label, cmdLineOptions.from_checkpoint)
 
   print("TRAINING DONE!")
