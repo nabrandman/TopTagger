@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 #import pandas as pd
 from DataGetter import DataGetter
 from math import sqrt, exp
@@ -14,6 +14,7 @@ def getValidData(dg, validDataFiles, options):
 
   minValidDataSize = 999999999
   for dsn in validDataFiles:
+    dg.domain=dsn[2]
     validDataArray.append(dg.importData(samplesToRun = tuple(dsn[0]), ptReweight=False))
 
     arrayLen = len(validDataArray[-1]["data"])
@@ -27,11 +28,11 @@ def getValidData(dg, validDataFiles, options):
   for data in validDataArray:
     for key in data:
       if key in validData:
-        validData[key] = numpy.vstack([validData[key], data[key][:int(minValidDataSize*dataMultiplier)]])
+        validData[key] = np.vstack([validData[key], data[key][:int(minValidDataSize*dataMultiplier)]])
       else:
         validData[key] = data[key][:int(minValidDataSize*dataMultiplier)]
 
-  perm = numpy.random.permutation(validData["data"].shape[0])
+  perm = np.random.permutation(validData["data"].shape[0])
 
   for key in validData:
     validData[key] = validData[key][perm]
@@ -43,7 +44,13 @@ def combineValidationData(validDataSig, validDataBg):
   
   validData = {}
   for key in validDataSig:
-    validData[key] = numpy.vstack([validDataBg[key][:minNumalidData], validDataSig[key][:minNumalidData]])
+    #validData[key] = np.vstack([validDataBg[key][:minNumalidData], validDataSig[key][:minNumalidData]])
+    validData[key] = np.vstack([validDataBg[key], validDataSig[key]])
+
+  #perm = np.random.permutation(validData["data"].shape[0])
+
+  #for key in validData:
+  #  validData[key] = validData[key][perm]
 
   return validData
 
@@ -63,7 +70,7 @@ def mainTF(options, label, from_checkpoint):
 
   #tf.debugging.set_log_device_placement(True)
   dgSig = DataGetter.DefinedVariables(options.netOp.vNames, signal = True)
-  #dgBg = DataGetter.DefinedVariables(options.netOp.vNames, background = True)
+  dgBg = DataGetter.DefinedVariables(options.netOp.vNames, background = True)
 
   data_path = os.getcwd()
   if label.endswith('/'):
@@ -76,43 +83,43 @@ def mainTF(options, label, from_checkpoint):
   vds = glob(data_path+'trainingTuple_*_'+label+'_division_1_TTToLNu2Q_sig_validation_*.h5')
   validDataSig = []
   for dfile in vds:
-    #validDataSig.append( ((dfile, ), 1) )
-    validDataSig.append( ((dfile, ), 1000) )
+    validDataSig.append( ((dfile, ), 1, 0) )
+    #validDataSig.append( ((dfile, ), 1000, 0) )
 
-  #vdbt = glob(data_path+'trainingTuple_*_'+label+'_division_1_TTToLNu2Q_bkg_validation_*.h5')
-  #validDataBgTTbar = []
-  #for dfile in vdbt:
-  #  validDataBgTTbar.append( ((dfile, ), 1) )
+  vdbt = glob(data_path+'trainingTuple_*_'+label+'_division_1_TTToLNu2Q_bkg_validation_*.h5')
+  validDataBgTTbar = []
+  for dfile in vdbt:
+    validDataBgTTbar.append( ((dfile, ), 1, 0) )
 
-  #vdbqmc = glob(data_path+'trainingTuple_*_'+label+'_division_1_QCD_*_bkg_validation_*.h5')
-  #validDataBgQCDMC = []
-  #for dfile in vdbqmc:
-  #  validDataBgQCDMC.append( ((dfile, ), 1) )
+  vdbqmc = glob(data_path+'trainingTuple_*_'+label+'_division_1_QCD_*_bkg_validation_*.h5')
+  validDataBgQCDMC = []
+  for dfile in vdbqmc:
+    validDataBgQCDMC.append( ((dfile, ), 1, 2) )
 
-  #vdbqd = glob(data_path+'trainingTuple_*_'+label+'_division_1_QCDCR_bkg_validation_*.h5')
-  #validDataBgQCDData = []
-  #for dfile in vdbqd:
-  #  validDataBgQCDData.append( ((dfile, ), 1) )
+  vdbqd = glob(data_path+'trainingTuple_*_'+label+'_division_1_QCDCR_bkg_validation_*.h5')
+  validDataBgQCDData = []
+  for dfile in vdbqd:
+    validDataBgQCDData.append( ((dfile, ), 1, 1) )
 
   # Import data
   #print(options.runOp.validationSamples)
 
-  #validDataSig =       getValidData(dgSig, validDataSig,       options)
-  validDataTTbar = getValidData(dgSig, validDataSig, options)
-  #print('Acquired Signal Validation Samples')
-  #validDataBgTTbar =   getValidData(dgBg,  validDataBgTTbar,   options)
-  #print('Acquired Background TTbar Validation Samples')
-  #validDataBgQCDMC =   getValidData(dgBg,  validDataBgQCDMC,   options)
-  #print('Acquired Background QCD Monte Carlo Validation Samples')
-  #validDataBgQCDData = getValidData(dgBg,  validDataBgQCDData, options)
-  #print('Acquired Background QCD Control Region Validation Samples')
+  validDataSig =       getValidData(dgSig, validDataSig,       options)
+  #validDataTTbar = getValidData(dgSig, validDataSig, options)
+  print('Acquired Signal Validation Samples')
+  validDataBgTTbar =   getValidData(dgBg,  validDataBgTTbar,   options)
+  print('Acquired Background TTbar Validation Samples')
+  validDataBgQCDMC =   getValidData(dgBg,  validDataBgQCDMC,   options)
+  print('Acquired Background QCD Monte Carlo Validation Samples')
+  validDataBgQCDData = getValidData(dgBg,  validDataBgQCDData, options)
+  print('Acquired Background QCD Control Region Validation Samples')
 
-  #validDataTTbar = combineValidationData(validDataSig, validDataBgTTbar)
+  validDataTTbar = combineValidationData(validDataSig, validDataBgTTbar)
   print('Combined TTbar Validation Samples')
   #validDataQCDMC = combineValidationData(validDataSig, validDataBgQCDMC)
-  #validDataQCDMC = validDataBgQCDMC
+  validDataQCDMC = validDataBgQCDMC
   #validDataQCDData = combineValidationData(validDataSig, validDataBgQCDData)
-  #validDataQCDData = validDataBgQCDData
+  validDataQCDData = validDataBgQCDData
 
   #get input/output sizes
   nFeatures = validDataTTbar["data"].shape[1]
@@ -129,9 +136,9 @@ def mainTF(options, label, from_checkpoint):
     validationCount = validDataTTbar['data'].shape[0]
 
   #scale data inputs to mean 0, stddev 1
-  categories = numpy.array(options.netOp.vCategories)
-  mins = numpy.zeros(categories.shape, dtype=numpy.float32)
-  ptps = numpy.zeros(categories.shape, dtype=numpy.float32)
+  categories = np.array(options.netOp.vCategories)
+  mins = np.zeros(categories.shape, dtype=np.float32)
+  ptps = np.zeros(categories.shape, dtype=np.float32)
   for i in range(categories.max()):
     selectedCategory = categories == i
     mins[selectedCategory] = validDataTTbar["data"][:,selectedCategory].mean()
@@ -144,9 +151,9 @@ def mainTF(options, label, from_checkpoint):
   signalValidSets = [DataSet(data_path+"trainingTuple_*_"+label+"_division_1_TTToLNu2Q_sig_validation_*.h5", 336.185965584, 480447813, 1.0, True, 0, 1.0, 1.0, 8)]
   print('Acquired Signal Training Sets')
   #pt reweighting histograms 
-  ttbarRatio = (numpy.array([0.7976347,  1.010679,  1.0329635,  1.0712056,  1.1147588,  1.0072196,  0.79854023, 0.7216115,  0.7717652,  0.851551,   0.8372917 ]), numpy.array([  0.,  50., 100., 150., 200., 250., 300., 350., 400., 450., 500., 1e10]))
-  QCDDataRatio = (numpy.array([0.50125164, 0.70985824, 1.007087,   1.6701245,  2.5925348,  3.6850858, 4.924969,   6.2674766,  7.5736594,  8.406105,   7.7529635 ]), numpy.array([  0.,  50., 100., 150., 200., 250., 300., 350., 400., 450., 500., 1e10]))
-  QCDMCRatio = (numpy.array([0.75231355, 1.0563549,  1.2571484,  1.3007764,  1.0678109,  0.83444154, 0.641499,   0.49130705, 0.36807108, 0.24333349, 0.06963781]), numpy.array([  0.,  50., 100., 150., 200., 250., 300., 350., 400., 450., 500., 1e10]))
+  ttbarRatio = (np.array([0.7976347,  1.010679,  1.0329635,  1.0712056,  1.1147588,  1.0072196,  0.79854023, 0.7216115,  0.7717652,  0.851551,   0.8372917 ]), np.array([  0.,  50., 100., 150., 200., 250., 300., 350., 400., 450., 500., 1e10]))
+  QCDDataRatio = (np.array([0.50125164, 0.70985824, 1.007087,   1.6701245,  2.5925348,  3.6850858, 4.924969,   6.2674766,  7.5736594,  8.406105,   7.7529635 ]), np.array([  0.,  50., 100., 150., 200., 250., 300., 350., 400., 450., 500., 1e10]))
+  QCDMCRatio = (np.array([0.75231355, 1.0563549,  1.2571484,  1.3007764,  1.0678109,  0.83444154, 0.641499,   0.49130705, 0.36807108, 0.24333349, 0.06963781]), np.array([  0.,  50., 100., 150., 200., 250., 300., 350., 400., 450., 500., 1e10]))
 
   backgroundDataSets = [DataSet(data_path+"trainingTuple_*_"+label+"_division_0_TTToLNu2Q_bkg_training_*.h5", 336.185965584, 480447813, 1.0, False, 0, 1.0, 1.0, 8),
                         DataSet(data_path+"trainingTuple_*_"+label+"_division_0_QCDCR_bkg_training_*.h5", 1.0, 1, 1.0, False, 1, 1.0, 1.0, 8),
@@ -187,7 +194,7 @@ def mainTF(options, label, from_checkpoint):
   print('Acquired Background Training Sets')
 
   dm = DataManager(options.netOp.vNames, nEpoch, nFeatures, nLabels, 2, nWeights, options.runOp.ptReweight, signalDataSets, backgroundDataSets)
-  dm_valid = DataManager(options.netOp.vNames, nEpoch, nFeatures, nLabels, 2, nWeights, options.runOp.ptReweight, signalValidSets, backgroundValidSets)
+  #dm_valid = DataManager(options.netOp.vNames, nEpoch, nFeatures, nLabels, 2, nWeights, options.runOp.ptReweight, signalValidSets, backgroundValidSets)
   print('Build DataManager')
 
   # Build the graph
@@ -196,11 +203,12 @@ def mainTF(options, label, from_checkpoint):
   rnnNodes = options.netOp.rnnNodes
   rnnLayers = options.netOp.rnnLayers
   grw = 2/(1+exp(-i/10000.0)) - 1
+  print('grw: ', grw)
   training=True
   mlp = CreateModel(options, denseNetwork, convLayers, rnnNodes, rnnLayers, mins, 1.0/ptps, l2Reg, options.runOp.keepProb, training, grw)
   print('Created MLP object')
 
-  """def validDataGenerator():
+  def validDataGenerator():
     all_Valid_sets = [validDataTTbar, validDataQCDMC, validDataQCDData]
     counts = [len(validDataTTbar["data"]), len(validDataQCDMC["data"]), len(validDataQCDData["data"])]
     currentCount = 0
@@ -214,8 +222,7 @@ def mainTF(options, label, from_checkpoint):
         continue
       else:
         yield {'x': all_Valid_sets[thirdCount-1]["data"][currentCount], 'p_': all_Valid_sets[thirdCount-1]["domain"][currentCount], 'wgt': all_Valid_sets[thirdCount-1]["weights"][currentCount], 'y_':  all_Valid_sets[thirdCount-1]["labels"][currentCount]}
-    return"""
-
+    return
 
   sig_data = tf.data.Dataset.from_generator(
     dm.sig_iterator,
@@ -490,7 +497,7 @@ def mainTF(options, label, from_checkpoint):
   train_data = train_data.batch(MiniBatchSize)
   train_data = train_data.prefetch(tf.data.AUTOTUNE)
 
-  """valid_data = tf.data.Dataset.from_generator(
+  valid_data = tf.data.Dataset.from_generator(
     validDataGenerator,
     output_signature=(
       {
@@ -500,8 +507,8 @@ def mainTF(options, label, from_checkpoint):
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
-  )"""
-  valid_data = tf.data.Dataset.from_generator(
+  )
+  """valid_data = tf.data.Dataset.from_generator(
     dm_valid.data_iterator,
     output_signature=(
       {
@@ -511,7 +518,7 @@ def mainTF(options, label, from_checkpoint):
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
-  )
+  )"""
 
   
   valid_data = valid_data.batch(MiniBatchSize)
@@ -522,7 +529,7 @@ def mainTF(options, label, from_checkpoint):
     filepath=checkpoint_location+label+'_{epoch:02d}-{val_loss:.2f}.keras',
   )
 
-  class LossLogger_perBatch(tf.keras.callbacks.Callback):
+  """class LossLogger_perBatch(tf.keras.callbacks.Callback):
     def __init__(self, n_batches):
       super().__init__()
       self.n_batches = n_batches
@@ -533,7 +540,7 @@ def mainTF(options, label, from_checkpoint):
         accuracy = logs.get('accuracy')
         print(f"\n\tBatch {batch}: loss = {loss:.6f} | accuracy = {accuracy:.6f}\n")
 
-  logger_callback = LossLogger_perBatch(n_batches=ReportInterval)
+  logger_callback = LossLogger_perBatch(n_batches=ReportInterval)"""
   #logging_callback = tf.keras.callbacks.ProgbarLogger(count_mode='samples').on_train_batch_end
   if from_checkpoint == '0':
     print('Creating New Model')
@@ -560,16 +567,54 @@ def mainTF(options, label, from_checkpoint):
     checkpoint_name = os.getcwd()+'/'+checkpoint_location+ckpt_name+ckpt_val_loss+'.keras'
     mlpModel = tf.keras.models.load_model(checkpoint_name, custom_objects=custom_layers)
 
+  class LossLogger_perBatch(tf.keras.callbacks.Callback):
+    def __init__(self, n_batches, _layers):
+      super().__init__()
+      self.n_batches = n_batches
+      self._layers = _layers
+
+    def on_train_batch_end(self, batch, logs=None):
+      if batch % self.n_batches == 0:
+        loss = logs.get('loss')
+        accuracy = logs.get('accuracy')
+        print(f"\n\tBatch {batch}: loss = {loss:.6f} | accuracy = {accuracy:.6f}")
+        #for layer in self._layers:
+        #  if isinstance(layer, tf.keras.layers.BatchNormalization):
+        #    print(f"\t{layer.name}: moving_mean shape {layer.moving_mean.shape} | trainable_weights length {len(layer.trainable_weights)} | non_trainable_weights length {len(layer.non_trainable_weights)} | trainable {layer.trainable} | trainable_weights {layer.trainable_weights} | non_trainable_weights {layer.non_trainable_weights}")
+        print()
+
+    def on_test_batch_end(self, batch, logs=None):
+      if batch % int(self.n_batches/10) == 0:
+        loss = logs.get('loss')
+        accuracy = logs.get('accuracy')
+        print(f"\n\tTest Batch {batch}: loss = {loss:.6f} | accuracy = {accuracy:.6f}")
+    #    for layer in self._layers:
+    #      if isinstance(layer, tf.keras.layers.BatchNormalization):
+    #        print(f"\t{layer.name}: moving_mean shape {layer.moving_mean.shape} | trainable_weights length {len(layer.trainable_weights)} | non_trainable_weights length {len(layer.non_trainable_weights)} | trainable {layer.trainable} | trainable_weights {layer.trainable_weights} | non_trainable_weights {layer.non_trainable_weights}")
+        print()
+
+    #def on_epoch_end(self, epoch, logs=None):
+    #  loss = logs.get('loss')
+    #  accuracy = logs.get('accuracy')
+    #  print(f"\n\tEpoch End: loss = {loss:.6f} | accuracy = {accuracy:.6f}")
+    #  for layer in self._layers:
+    #    if isinstance(layer, tf.keras.layers.BatchNormalization):
+    #      print(f"\t{layer.name}: moving_mean shape {layer.moving_mean.shape} | trainable_weights length {len(layer.trainable_weights)} | non_trainable_weights length {len(layer.non_trainable_weights)} | trainable {layer.trainable} | trainable_weights {layer.trainable_weights} | non_trainable_weights {layer.non_trainable_weights}")
+    #  print()
+    
+
+  logger_callback = LossLogger_perBatch(n_batches=ReportInterval, _layers=mlpModel.layers)
+
   print('\n\nfitting')
   print("Reporting validation loss every %i batches with %i events per batch for %i epochs\n\n"%(ReportInterval, MiniBatchSize, nEpoch))
   history = mlpModel.fit(
     x=train_data,
     epochs=nEpoch,
     initial_epoch=int(from_checkpoint),
-    #steps_per_epoch=ReportInterval,
+    #steps_per_epoch=validationCount,
     #verbose=2,
     validation_data=valid_data,
-    callbacks=[logger_callback, checkpoint_callback],
+    callbacks=[logger_callback],# checkpoint_callback],
   )
 
   print('TRAINING COMPLETE')

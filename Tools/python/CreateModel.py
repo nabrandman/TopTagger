@@ -87,8 +87,9 @@ class CreateModel:
         addResult = {}
 
         # Fully connected input layer
-        batch_normalizer = tf.keras.layers.BatchNormalization(trainable=(not share), name="layer0_bn")
-        h_fc[0] = batch_normalizer(denseInputLayer, training=training)
+        print('not share:', not share)
+        batch_normalizer = tf.keras.layers.BatchNormalization(name="layer0_bn")#trainable=(not share), name="layer0_bn")
+        h_fc[0] = batch_normalizer(denseInputLayer)
         addResult_layers = {}
 
         # create hidden layers 
@@ -105,8 +106,8 @@ class CreateModel:
             if not (layer - 1) in w_fc:
                 w_fc[layer - 1], b_fc[layer - 1] = addResult_layers[layer - 1].get_weights()
             #add batch normalization 
-            new_batch_normalizer = tf.keras.layers.BatchNormalization(trainable=(not share), name="layer%i_bn"%layer)
-            batchNormalizedLayer = new_batch_normalizer(addResult[layer - 1], training=training)
+            new_batch_normalizer = tf.keras.layers.BatchNormalization(name="layer%i_bn"%layer)#trainable=(not share), name="layer%i_bn"%layer)
+            batchNormalizedLayer = new_batch_normalizer(addResult[layer - 1])
             if self.options.netOp.denseActivationFunc == "none":
                 layerOutput = tf.keras.layers.Dense(batchNormalizedLayer.shape[1], activation='relu', use_bias=False, kernel_initializer=tf.keras.initializers.Identity(), name="h_fc%i%s"%(layer,prefix))(batchNormalizedLayer)
                 #layerOutput = batchNormalizedLayer
@@ -147,7 +148,7 @@ class CreateModel:
         if len(self.nnStruct) < 2:
             #throw
             raise
-        
+
         #Define inputs and training inputs
         self.x = tf.keras.Input(shape=(self.nnStruct[0],), name="x")
         self.p_ = tf.keras.Input(shape=(self.nnStruct[NLayer - 1],), name="p_")
@@ -178,4 +179,5 @@ class CreateModel:
             optimizer=tf.keras.optimizers.Adam(learning_rate=1.0e-4),
             loss=None,
             )
+        #self.model.trainable = True
         return self.model
