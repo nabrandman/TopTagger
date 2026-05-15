@@ -402,7 +402,7 @@ class networkOptions:
                                              "NeutralMultiplicity", "TotalMultiplicity", "recoJetsHFEMEnergyFraction", "recoJetsHFHadronEnergyFraction", "recoJetschargedEmEnergyFraction",
                                              "recoJetschargedHadronEnergyFraction", "recoJetsmuonEnergyFraction", "recoJetsneutralEmEnergyFraction", "recoJetsneutralEnergyFraction",
                                              "btagUParTAK4B", "btagUParTAK4CvB", "btagUParTAK4CvL", "btagUParTAK4CvNotB", "btagUParTAK4QvG"],
-                      denseLayers         = [100],
+                      denseLayers         = [300],
                       denseActivationFunc = "relu",
                       convLayers          = [],
                       rnnNodes            = 30,

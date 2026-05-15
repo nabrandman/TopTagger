@@ -161,9 +161,11 @@ class DataGetter:
                 ptWeightHist = self.weightHist[0]
                 npyInputWgts *= ptWeightHist[np.digitize(dataPt, ptBins) - 1].reshape([-1,1])
 
-            d = np.zeros((npyInputData.shape[0], 2))
-            if self.domain != None and self.domain > 0:
-                d[:,self.domain - 1] = 1
+            d = np.zeros((npyInputData.shape[0], 3))
+            #if self.domain != None and self.domain > 0:
+            #    d[:,self.domain - 1] = 1
+            if self.domain != None:
+                d[:,self.domain] = 1
 
             if for_metrics:
                 gen_dsets = [h5py.File(filename, mode='r')['gen_tops'] for filename in samplesToRun_]

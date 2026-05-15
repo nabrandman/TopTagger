@@ -9,7 +9,7 @@ from DataSample import DataSample
 
 class DataManager:
 
-    def __init__(self, variables, nEpoch, nFeatures, nLabels, nDomains, nWeigts, ptReweight, signalDataSets, backgroundDataSets):
+    def __init__(self, variables, nEpoch, nFeatures, nLabels, nDomains, nWeigts, ptReweight, signalDataSets, backgroundDataSets, batchSize, half_quarter):
         self.nEpoch = nEpoch
 
         #Define input data queue
@@ -20,7 +20,10 @@ class DataManager:
         for dataSet in signalDataSets:
             self.sigScaleSum += dataSet.xsec*dataSet.rescale*dataSet.kFactor/dataSet.Nevts
 
-        batchSize = int(65536 / 4)
+        #batchSize = int(65536 / 4)
+        self.batchSize = batchSize
+        self.half_quarter = half_quarter
+        self.cutoffBatch = int(batchSize/self.half_quarter)
         self.sigDataSamples = []
         #print('\n\nSignal\n')
         for dataSet in signalDataSets:
@@ -53,7 +56,12 @@ class DataManager:
         self.bgDataSamples_2000to2500 = []
         self.bgDataSamples_2500to3000 = []
 
-        n_bgDataSamples = 0
+        self.n_bgDataSamples = 0
+        self.n_sigDataSamples = 0
+        self.n_bgTTbarSamples = 0
+        self.n_bgQCDCRSamples = 0
+        self.n_bgQCDMCSamples = 0
+        self.continue_check = True
         #print('\n\nBackground\n')
         for dataSet in backgroundDataSets:
             if '_15to20_' in dataSet.fileGlob:
@@ -95,133 +103,300 @@ class DataManager:
 
         for dataSet in backgroundDataSets:
             self.bgDataSamples.append(DataSample(dataSet, nEpoch, batchSize, variables, self.inputDataQueue, self.bgScaleSum, signal=False, background=True, domain=dataSet.domain, ptReweight=ptReweight))
-            #n_bgDataSamples += 1
-            #if n_bgDataSamples % 2 == 0:
-            #    #print('one: ', dataSet.fileGlob)
-            #    self.bgDataSamples_one.append(DataSample(dataSet, nEpoch, batchSize, variables, self.inputDataQueue, self.bgScaleSum, signal=False, background=True, domain=dataSet.domain, ptReweight=ptReweight))
-            #else:
-            #    #print('two: ', dataSet.fileGlob)
-            #    self.bgDataSamples_two.append(DataSample(dataSet, nEpoch, batchSize, variables, self.inputDataQueue, self.bgScaleSum, signal=False, background=True, domain=dataSet.domain, ptReweight=ptReweight))
 
+
+    def reset_counts(self):
+        self.n_bgDataSamples = 0
+        self.n_sigDataSamples = 0
+        self.n_bgTTbarSamples = 0
+        self.n_bgQCDCRSamples = 0
+        self.n_bgQCDMCSamples = 0
+        self.continue_check = True
+        return
 
     def sig_iterator(self):
-        #print('\n\nsig_iterator:')
         for ds in self.sigDataSamples:
-            #print(ds.fileList)
             for data in ds.get_data():
-                yield data
+                self.n_sigDataSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_bgTTbarSamples, self.n_bgQCDCRSamples, self.n_bgQCDMCSamples)
+                if self.n_sigDataSamples > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_tt(self):
-        #print('\n\nbg_iterator_tt')
-        #_N = np.random.permutation(len(self.bgDataSamples_tt))
-        #for n in _N:
-        #    ds = self.bgDataSamples_tt[n]
         for ds in self.bgDataSamples_tt:
-            #print(ds.fileList)
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgTTbarSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgQCDCRSamples, self.n_bgQCDMCSamples)
+                    bkg_count = self.n_bgTTbarSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
 
     def bg_iterator_cr(self):
-        #print('\n\nbg_iterator_cr')
-        #_N = np.random.permutation(len(self.bgDataSamples_cr))
-        #for n in _N:
-        #    ds = self.bgDataSamples_cr[n]
         for ds in self.bgDataSamples_cr:
-            #print(ds.fileList)
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDCRSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDMCSamples)
+                    bkg_count = self.n_bgQCDCRSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
 
     def bg_iterator_15to20(self):
         for ds in self.bgDataSamples_15to20:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_20to30(self):
         for ds in self.bgDataSamples_20to30:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_30to50(self):
         for ds in self.bgDataSamples_30to50:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_50to80(self):
         for ds in self.bgDataSamples_50to80:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_80to120(self):
         for ds in self.bgDataSamples_80to120:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_120to170(self):
         for ds in self.bgDataSamples_120to170:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_170to300(self):
         for ds in self.bgDataSamples_170to300:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_300to470(self):
         for ds in self.bgDataSamples_300to470:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_470to600(self):
         for ds in self.bgDataSamples_470to600:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_600to800(self):
         for ds in self.bgDataSamples_600to800:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_800to1000(self):
         for ds in self.bgDataSamples_800to1000:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_1000to1500(self):
         for ds in self.bgDataSamples_1000to1500:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_1500to2000(self):
         for ds in self.bgDataSamples_1500to2000:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_2000to2500(self):
         for ds in self.bgDataSamples_2000to2500:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_2500to3000(self):
         for ds in self.bgDataSamples_2500to3000:
             for data in ds.get_data():
-                yield data
+                self.n_bgDataSamples += 1
+                self.n_bgQCDMCSamples += 1
+                if self.half_quarter == 2:
+                    cutoff_number = self.n_sigDataSamples
+                    bkg_count = self.n_bgDataSamples
+                else:
+                    cutoff_number = max(self.n_sigDataSamples, self.n_bgTTbarSamples, self.n_bgQCDCRSamples)
+                    bkg_count = self.n_bgQCDMCSamples
+                if bkg_count > cutoff_number+self.cutoffBatch: self.continue_check = False
+                if self.continue_check:
+                    yield data
         return
     
     def bg_iterator_mc(self):
@@ -231,7 +406,7 @@ class DataManager:
             ds = self.bgDataSamples_mc[n]
             #print('mc')
             #print(ds.fileList)
-            for data in ds.get_data():
+            for data in ds.get_data(True):
                 yield data
         return
             
@@ -249,10 +424,10 @@ class DataManager:
 
     def data_iterator(self):
         for ds in self.sigDataSamples:
-            for data in ds.get_data():
+            for data in ds.get_data(True):
                 yield data
         for ds in self.bgDataSamples:
-            for data in ds.get_data():
+            for data in ds.get_data(True):
                 yield data
         return
 

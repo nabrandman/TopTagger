@@ -52,7 +52,7 @@ class DataSample:
             #print()
             #print(fileName, data['data'].shape[0])
             #print()
-            while batch_idx < nSamples-1:
+            while (batch_idx < nSamples-1):
                 batch_idx += 1
                 #print(fileName, batch_idx)
                 yield {'x': data["data"][batch_idx-1], 'p_': data["domain"][batch_idx-1], 'wgt': data["weights"][batch_idx-1], 'y_': data["labels"][batch_idx-1]}

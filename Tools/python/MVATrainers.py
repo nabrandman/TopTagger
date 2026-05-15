@@ -44,17 +44,17 @@ def combineValidationData(validDataSig, validDataBg):
   
   validData = {}
   for key in validDataSig:
-    #validData[key] = np.vstack([validDataBg[key][:minNumalidData], validDataSig[key][:minNumalidData]])
-    validData[key] = np.vstack([validDataBg[key], validDataSig[key]])
+    validData[key] = np.vstack([validDataBg[key][:minNumalidData], validDataSig[key][:minNumalidData]])
+    #validData[key] = np.vstack([validDataBg[key], validDataSig[key]])
 
-  #perm = np.random.permutation(validData["data"].shape[0])
+  perm = np.random.permutation(validData["data"].shape[0])
 
-  #for key in validData:
-  #  validData[key] = validData[key][perm]
+  for key in validData:
+    validData[key] = validData[key][perm]
 
   return validData
 
-def mainTF(options, label, from_checkpoint):
+def mainTF(options, label, from_checkpoint, saveName, halforquarter):
 
   import tensorflow as tf
   from CreateModel import CreateModel
@@ -80,6 +80,9 @@ def mainTF(options, label, from_checkpoint):
     label += 'model'
     data_path = data_path[:-1]
 
+  if saveName == '':
+    saveName = label
+  halforquarter = int(halforquarter)
   vds = glob(data_path+'trainingTuple_*_'+label+'_division_1_TTToLNu2Q_sig_validation_*.h5')
   validDataSig = []
   for dfile in vds:
@@ -91,15 +94,15 @@ def mainTF(options, label, from_checkpoint):
   for dfile in vdbt:
     validDataBgTTbar.append( ((dfile, ), 1, 0) )
 
-  vdbqmc = glob(data_path+'trainingTuple_*_'+label+'_division_1_QCD_*_bkg_validation_*.h5')
-  validDataBgQCDMC = []
-  for dfile in vdbqmc:
-    validDataBgQCDMC.append( ((dfile, ), 1, 2) )
+  #vdbqmc = glob(data_path+'trainingTuple_*_'+label+'_division_1_QCD_*_bkg_validation_*.h5')
+  #validDataBgQCDMC = []
+  #for dfile in vdbqmc:
+  #  validDataBgQCDMC.append( ((dfile, ), 1, 2) )
 
-  vdbqd = glob(data_path+'trainingTuple_*_'+label+'_division_1_QCDCR_bkg_validation_*.h5')
-  validDataBgQCDData = []
-  for dfile in vdbqd:
-    validDataBgQCDData.append( ((dfile, ), 1, 1) )
+  #vdbqd = glob(data_path+'trainingTuple_*_'+label+'_division_1_QCDCR_bkg_validation_*.h5')
+  #validDataBgQCDData = []
+  #for dfile in vdbqd:
+  #  validDataBgQCDData.append( ((dfile, ), 1, 1) )
 
   # Import data
   #print(options.runOp.validationSamples)
@@ -109,17 +112,17 @@ def mainTF(options, label, from_checkpoint):
   print('Acquired Signal Validation Samples')
   validDataBgTTbar =   getValidData(dgBg,  validDataBgTTbar,   options)
   print('Acquired Background TTbar Validation Samples')
-  validDataBgQCDMC =   getValidData(dgBg,  validDataBgQCDMC,   options)
-  print('Acquired Background QCD Monte Carlo Validation Samples')
-  validDataBgQCDData = getValidData(dgBg,  validDataBgQCDData, options)
-  print('Acquired Background QCD Control Region Validation Samples')
+  #validDataBgQCDMC =   getValidData(dgBg,  validDataBgQCDMC,   options)
+  #print('Acquired Background QCD Monte Carlo Validation Samples')
+  #validDataBgQCDData = getValidData(dgBg,  validDataBgQCDData, options)
+  #print('Acquired Background QCD Control Region Validation Samples')
 
   validDataTTbar = combineValidationData(validDataSig, validDataBgTTbar)
   print('Combined TTbar Validation Samples')
   #validDataQCDMC = combineValidationData(validDataSig, validDataBgQCDMC)
-  validDataQCDMC = validDataBgQCDMC
+  #validDataQCDMC = validDataBgQCDMC
   #validDataQCDData = combineValidationData(validDataSig, validDataBgQCDData)
-  validDataQCDData = validDataBgQCDData
+  #validDataQCDData = validDataBgQCDData
 
   #get input/output sizes
   nFeatures = validDataTTbar["data"].shape[1]
@@ -131,9 +134,10 @@ def mainTF(options, label, from_checkpoint):
   MiniBatchSize = options.runOp.minibatchSize
   nEpoch = options.runOp.nepoch
   ReportInterval = options.runOp.reportInterval
-  validationCount = min(options.runOp.nValidationEvents, validDataTTbar["data"].shape[0])
-  if validationCount <= 0:
-    validationCount = validDataTTbar['data'].shape[0]
+  #validationCount = min(options.runOp.nValidationEvents, validDataTTbar["data"].shape[0])
+  #if validationCount <= 0:
+  #  validationCount = validDataTTbar['data'].shape[0]
+  validationCount = validDataTTbar['data'].shape[0]
 
   #scale data inputs to mean 0, stddev 1
   categories = np.array(options.netOp.vCategories)
@@ -193,8 +197,8 @@ def mainTF(options, label, from_checkpoint):
 
   print('Acquired Background Training Sets')
 
-  dm = DataManager(options.netOp.vNames, nEpoch, nFeatures, nLabels, 2, nWeights, options.runOp.ptReweight, signalDataSets, backgroundDataSets)
-  #dm_valid = DataManager(options.netOp.vNames, nEpoch, nFeatures, nLabels, 2, nWeights, options.runOp.ptReweight, signalValidSets, backgroundValidSets)
+  dm = DataManager(options.netOp.vNames, nEpoch, nFeatures, nLabels, 2, nWeights, options.runOp.ptReweight, signalDataSets, backgroundDataSets, MiniBatchSize, halforquarter)
+  dm_valid = DataManager(options.netOp.vNames, nEpoch, nFeatures, nLabels, 2, nWeights, options.runOp.ptReweight, signalValidSets, backgroundValidSets, MiniBatchSize*MiniBatchSize*MiniBatchSize, 4)
   print('Build DataManager')
 
   # Build the graph
@@ -202,13 +206,11 @@ def mainTF(options, label, from_checkpoint):
   convLayers = options.netOp.convLayers
   rnnNodes = options.netOp.rnnNodes
   rnnLayers = options.netOp.rnnLayers
-  grw = 2/(1+exp(-i/10000.0)) - 1
-  print('grw: ', grw)
   training=True
-  mlp = CreateModel(options, denseNetwork, convLayers, rnnNodes, rnnLayers, mins, 1.0/ptps, l2Reg, options.runOp.keepProb, training, grw)
+  mlp = CreateModel(options, denseNetwork, convLayers, rnnNodes, rnnLayers, mins, 1.0/ptps, l2Reg, options.runOp.keepProb, training)
   print('Created MLP object')
 
-  def validDataGenerator():
+  """def validDataGenerator():
     all_Valid_sets = [validDataTTbar, validDataQCDMC, validDataQCDData]
     counts = [len(validDataTTbar["data"]), len(validDataQCDMC["data"]), len(validDataQCDData["data"])]
     currentCount = 0
@@ -222,59 +224,26 @@ def mainTF(options, label, from_checkpoint):
         continue
       else:
         yield {'x': all_Valid_sets[thirdCount-1]["data"][currentCount], 'p_': all_Valid_sets[thirdCount-1]["domain"][currentCount], 'wgt': all_Valid_sets[thirdCount-1]["weights"][currentCount], 'y_':  all_Valid_sets[thirdCount-1]["labels"][currentCount]}
-    return
+    return"""
 
   sig_data = tf.data.Dataset.from_generator(
     dm.sig_iterator,
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
   )
-
-  """bkg_data1 = tf.data.Dataset.from_generator(
-    dm.bg_iterator_one,
-    output_signature=(
-      {
-        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
-        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
-      }
-    )
-  )
-
-  bkg_data2 = tf.data.Dataset.from_generator(
-    dm.bg_iterator_two,
-    output_signature=(
-      {
-        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
-        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
-        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
-      }
-    )
-  )"""
-
-  #bkg_data1 = bkg_data.enumerate() \
-  #                    .filter(lambda i, data: i % 2 == 0) \
-  #                    .map(lambda j, datum: datum)
-  #bkg_data2 = bkg_data.enumerate() \
-  #                    .filter(lambda i, data: i % 2 != 0) \
-  #                    .map(lambda j, datum: datum)
-  #train_data = tf.data.Dataset.from_tensor_slices([sig_data, bkg_data1, bkg_data2])
-  #train_data = train_data.interleave(lambda x: x, cycle_length=3, block_length=1, num_parallel_calls=tf.data.AUTOTUNE)
 
   bkg_data_tt = tf.data.Dataset.from_generator(
     dm.bg_iterator_tt,
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -286,7 +255,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -298,7 +267,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -310,7 +279,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -322,7 +291,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -334,7 +303,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -346,7 +315,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -358,7 +327,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -370,7 +339,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -382,7 +351,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -394,7 +363,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -406,7 +375,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -418,7 +387,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -430,7 +399,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -442,7 +411,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -454,7 +423,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -466,7 +435,7 @@ def mainTF(options, label, from_checkpoint):
     output_signature=(
       {
         'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
-        'p_' : tf.TensorSpec(shape=(2,), dtype=tf.float64),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
         'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
@@ -491,13 +460,19 @@ def mainTF(options, label, from_checkpoint):
      bkg_data_2500to3000]
     )
   bkg_data_mc = bkg_data_mc.interleave(lambda x: x, cycle_length=15, block_length=1, num_parallel_calls=tf.data.AUTOTUNE)
-  train_data = tf.data.Dataset.from_tensor_slices([sig_data, bkg_data_tt, bkg_data_cr, bkg_data_mc])
-  train_data = train_data.interleave(lambda x: x, cycle_length=4, block_length=1, num_parallel_calls=tf.data.AUTOTUNE)
+  if halforquarter == 2:
+    all_bkg_data = tf.data.Dataset.from_tensor_slices([bkg_data_tt, bkg_data_cr, bkg_data_mc])
+    all_bkg_data = all_bkg_data.interleave(lambda x: x, cycle_length=3, block_length=1, num_parallel_calls=tf.data.AUTOTUNE)
+    train_data = tf.data.Dataset.from_tensor_slices([sig_data, all_bkg_data])
+    train_data = train_data.interleave(lambda x: x, cycle_length=2, block_length=1, num_parallel_calls=tf.data.AUTOTUNE)
+  elif halforquarter == 4:
+    train_data = tf.data.Dataset.from_tensor_slices([sig_data, bkg_data_tt, bkg_data_cr, bkg_data_mc])
+    train_data = train_data.interleave(lambda x: x, cycle_length=4, block_length=1, num_parallel_calls=tf.data.AUTOTUNE)
   train_data = train_data.shuffle(buffer_size=MiniBatchSize*32*4)
   train_data = train_data.batch(MiniBatchSize)
   train_data = train_data.prefetch(tf.data.AUTOTUNE)
 
-  valid_data = tf.data.Dataset.from_generator(
+  """valid_data = tf.data.Dataset.from_generator(
     validDataGenerator,
     output_signature=(
       {
@@ -507,7 +482,7 @@ def mainTF(options, label, from_checkpoint):
         'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
       }
     )
-  )
+  )"""
   """valid_data = tf.data.Dataset.from_generator(
     dm_valid.data_iterator,
     output_signature=(
@@ -519,54 +494,278 @@ def mainTF(options, label, from_checkpoint):
       }
     )
   )"""
+  vsig_data = tf.data.Dataset.from_generator(
+    dm_valid.sig_iterator,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
 
-  
+  vbkg_data_tt = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_tt,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_cr = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_cr,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_15to20 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_15to20,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_20to30 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_20to30,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_30to50 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_30to50,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_50to80 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_50to80,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_80to120 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_80to120,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_120to170 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_120to170,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_170to300 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_170to300,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_300to470 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_300to470,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_470to600 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_470to600,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_600to800 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_600to800,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_800to1000 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_800to1000,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_1000to1500 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_1000to1500,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_1500to2000 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_1500to2000,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_2000to2500 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_2000to2500,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_2500to3000 = tf.data.Dataset.from_generator(
+    dm_valid.bg_iterator_2500to3000,
+    output_signature=(
+      {
+        'x'  : tf.TensorSpec(shape=(64,), dtype=tf.float32),
+        'p_' : tf.TensorSpec(shape=(3,), dtype=tf.float64),
+        'wgt': tf.TensorSpec(shape=(1,), dtype=tf.float64),
+        'y_' : tf.TensorSpec(shape=(2,), dtype=tf.float32),
+      }
+    )
+  )
+
+  vbkg_data_mc = tf.data.Dataset.from_tensor_slices(
+    [vbkg_data_15to20,
+     vbkg_data_20to30,
+     vbkg_data_30to50,
+     vbkg_data_50to80,
+     vbkg_data_80to120,
+     vbkg_data_120to170,
+     vbkg_data_170to300,
+     vbkg_data_300to470,
+     vbkg_data_470to600,
+     vbkg_data_600to800,
+     vbkg_data_800to1000,
+     vbkg_data_1000to1500,
+     vbkg_data_1500to2000,
+     vbkg_data_2000to2500,
+     vbkg_data_2500to3000]
+    )
+  vbkg_data_mc = vbkg_data_mc.interleave(lambda x: x, cycle_length=15, block_length=1, num_parallel_calls=tf.data.AUTOTUNE)
+  valid_data = tf.data.Dataset.from_tensor_slices([vsig_data, vbkg_data_tt, vbkg_data_cr, vbkg_data_mc])
+  valid_data = valid_data.interleave(lambda x: x, cycle_length=4, block_length=1, num_parallel_calls=tf.data.AUTOTUNE)
+  #valid_data = valid_data.shuffle(buffer_size=MiniBatchSize*32*4)
   valid_data = valid_data.batch(MiniBatchSize)
   valid_data = valid_data.prefetch(tf.data.AUTOTUNE)
 
   checkpoint_location = options.runOp.directory+'trained_models/checkpoints/'
   checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-    filepath=checkpoint_location+label+'_{epoch:02d}-{val_loss:.2f}.keras',
+    filepath=checkpoint_location+saveName+'_{epoch:02d}-{val_loss:.2f}.keras',
   )
 
-  """class LossLogger_perBatch(tf.keras.callbacks.Callback):
-    def __init__(self, n_batches):
-      super().__init__()
-      self.n_batches = n_batches
-
-    def on_train_batch_end(self, batch, logs=None):
-      if batch % self.n_batches == 0:
-        loss = logs.get('loss')
-        accuracy = logs.get('accuracy')
-        print(f"\n\tBatch {batch}: loss = {loss:.6f} | accuracy = {accuracy:.6f}\n")
-
-  logger_callback = LossLogger_perBatch(n_batches=ReportInterval)"""
-  #logging_callback = tf.keras.callbacks.ProgbarLogger(count_mode='samples').on_train_batch_end
   if from_checkpoint == '0':
     print('Creating New Model')
     mlpModel = mlp.get_model()
+    #mlpModel, loss_fn = mlp.get_alt_model()
   else:
-    print('Loading Checkpoint '+from_checkpoint+' for model: '+label)
+    print('Loading Checkpoint '+from_checkpoint+' for model: '+saveName)
     custom_layers = mlp.get_layers()
     if len(from_checkpoint) < 2:
       epoch_num = '0' + from_checkpoint
     else:
       epoch_num = from_checkpoint
     ckpt_names = os.listdir(os.getcwd()+'/'+checkpoint_location)
-    ckpt_name = label+'_'+epoch_num+'-'
+    ckpt_name = saveName+'_'+epoch_num+'-'
     ckpt_val_loss = ''
     for name in ckpt_names:
       if ckpt_name in name:
         ckpt_val_loss = name.split('.keras')[0]
         break
     if ckpt_val_loss == '':
-      sys.exit('Checkpoint '+from_checkpoint+' not found for model: '+label)
+      sys.exit('Checkpoint '+from_checkpoint+' not found for model: '+saveName)
     
     ckpt_val_loss = ckpt_val_loss.split(ckpt_name)[1]
     
     checkpoint_name = os.getcwd()+'/'+checkpoint_location+ckpt_name+ckpt_val_loss+'.keras'
     mlpModel = tf.keras.models.load_model(checkpoint_name, custom_objects=custom_layers)
 
+  nValid_steps = options.runOp.nValidationEvents
   class LossLogger_perBatch(tf.keras.callbacks.Callback):
     def __init__(self, n_batches, _layers):
       super().__init__()
@@ -574,36 +773,57 @@ def mainTF(options, label, from_checkpoint):
       self._layers = _layers
 
     def on_train_batch_end(self, batch, logs=None):
+      if batch == 0:
+        dm_valid.reset_counts()
+
       if batch % self.n_batches == 0:
         loss = logs.get('loss')
-        accuracy = logs.get('accuracy')
-        print(f"\n\tBatch {batch}: loss = {loss:.6f} | accuracy = {accuracy:.6f}")
-        #for layer in self._layers:
-        #  if isinstance(layer, tf.keras.layers.BatchNormalization):
-        #    print(f"\t{layer.name}: moving_mean shape {layer.moving_mean.shape} | trainable_weights length {len(layer.trainable_weights)} | non_trainable_weights length {len(layer.non_trainable_weights)} | trainable {layer.trainable} | trainable_weights {layer.trainable_weights} | non_trainable_weights {layer.non_trainable_weights}")
+        label_loss = logs.get('Ll')
+        domain_loss = logs.get('Dl')
+        l2_norm_loss = logs.get('L2l')
+        label_accuracy = logs.get('La')
+        domain_accuracy = logs.get('Da')
+        label_mae = logs.get('Lm')
+        domain_mae = logs.get('Dm')
+        print(f"\n  Batch {batch:>5}: loss = {loss:.6f} | l_loss = {label_loss:.6f} | d_loss = {domain_loss:.6f} | l2_norm_loss = {l2_norm_loss:.6f}")
+        print(f"               l_accuracy = {label_accuracy:.6f} | d_accuracy = {domain_accuracy:.6f} | l_mae = {label_mae:.6f} | d_mae = {domain_mae:.6f}")
         print()
 
     def on_test_batch_end(self, batch, logs=None):
-      if batch % int(self.n_batches/10) == 0:
+      if batch == 0:
+        dm.reset_counts()
+      if batch % (nValid_steps/10) == 0:#int(self.n_batches/10) == 0:
         loss = logs.get('loss')
-        accuracy = logs.get('accuracy')
-        print(f"\n\tTest Batch {batch}: loss = {loss:.6f} | accuracy = {accuracy:.6f}")
-    #    for layer in self._layers:
-    #      if isinstance(layer, tf.keras.layers.BatchNormalization):
-    #        print(f"\t{layer.name}: moving_mean shape {layer.moving_mean.shape} | trainable_weights length {len(layer.trainable_weights)} | non_trainable_weights length {len(layer.non_trainable_weights)} | trainable {layer.trainable} | trainable_weights {layer.trainable_weights} | non_trainable_weights {layer.non_trainable_weights}")
+        label_loss = logs.get('Ll')
+        domain_loss = logs.get('Dl')
+        l2_norm_loss = logs.get('L2l')
+        label_accuracy = logs.get('La')
+        domain_accuracy = logs.get('Da')
+        label_mae = logs.get('Lm')
+        domain_mae = logs.get('Dm')
+        if halforquarter == 2:
+          print('\nHALF HALF HALF HALF HALF HALF HALF HALF HALF HALF HALF HALF HALF HALF HALF HALF HALF HALF')
+        elif halforquarter == 4:
+          print('\nQUARTER QUARTER QUARTER QUARTER QUARTER QUARTER QUARTER QUARTER QUARTER QUARTER QUARTER QUARTER')
+        print(f"\n  Test Batch {batch:>5}: loss = {loss:.6f} | l_loss = {label_loss:.6f} | d_loss = {domain_loss:.6f} | l2_norm_loss = {l2_norm_loss:.6f}")
+        print(f"                    l_accuracy = {label_accuracy:.6f} | d_accuracy = {domain_accuracy:.6f} | l_mae = {label_mae:.6f} | d_mae = {domain_mae:.6f}")
         print()
-
-    #def on_epoch_end(self, epoch, logs=None):
-    #  loss = logs.get('loss')
-    #  accuracy = logs.get('accuracy')
-    #  print(f"\n\tEpoch End: loss = {loss:.6f} | accuracy = {accuracy:.6f}")
-    #  for layer in self._layers:
-    #    if isinstance(layer, tf.keras.layers.BatchNormalization):
-    #      print(f"\t{layer.name}: moving_mean shape {layer.moving_mean.shape} | trainable_weights length {len(layer.trainable_weights)} | non_trainable_weights length {len(layer.non_trainable_weights)} | trainable {layer.trainable} | trainable_weights {layer.trainable_weights} | non_trainable_weights {layer.non_trainable_weights}")
-    #  print()
-    
-
+      
   logger_callback = LossLogger_perBatch(n_batches=ReportInterval, _layers=mlpModel.layers)
+
+  class ResetGradientWeightCallback(tf.keras.callbacks.Callback):
+    def __init__(self, layer_name):
+      super().__init__()
+      self.layer_name = layer_name
+
+    def on_epoch_end(self, epoch, logs=None):
+      layer = self.model.get_layer(self.layer_name)
+
+      weights = layer.get_weights()
+      new_weights = [np.zeros_like(w) for w in weights]
+      layer.set_weights(new_weights)
+
+  reset_callback = ResetGradientWeightCallback(layer_name='gradientReversal_layer_1')
 
   print('\n\nfitting')
   print("Reporting validation loss every %i batches with %i events per batch for %i epochs\n\n"%(ReportInterval, MiniBatchSize, nEpoch))
@@ -611,20 +831,23 @@ def mainTF(options, label, from_checkpoint):
     x=train_data,
     epochs=nEpoch,
     initial_epoch=int(from_checkpoint),
-    #steps_per_epoch=validationCount,
-    #verbose=2,
+    steps_per_epoch=5,
+    #verbose=0,
     validation_data=valid_data,
-    callbacks=[logger_callback],# checkpoint_callback],
+    validation_steps=nValid_steps,
+    #callbacks=[logger_callback, reset_callback, checkpoint_callback],
+    callbacks=[logger_callback, checkpoint_callback],
   )
 
   print('TRAINING COMPLETE')
-  mlpModel.save(options.runOp.directory+'trained_models/'+label+'_model.keras')
-  print('model saved at: '+options.runOp.directory+'trained_models/'+label+'_model.keras')
+  mlpModel.save(options.runOp.directory+'trained_models/'+saveName+'_model.keras')
+  print('model saved at: '+options.runOp.directory+'trained_models/'+saveName+'_model.keras')
 
   print(history)
   print(history.history)
-  with open(options.runOp.directory+'trained_models/'+label+'_history.log', 'w') as f:
+  with open(options.runOp.directory+'trained_models/'+saveName+'_history.log', 'w') as f:
     for key in history.history.keys():
       f.write("\n\n"+key+"\n")
       for value in history.history[key]:
         f.write(str(value)+"\n")
+
